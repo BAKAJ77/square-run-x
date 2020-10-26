@@ -12,7 +12,7 @@
 #include "Engine/Core/GameStateManager.h"
 
 // Other Includes
-#include "Game/States/ResourceLoading.h"
+#include "Game/States/Other/ResourceLoading.h"
 
 #include <array>
 #include <glm/gtc/matrix_transform.hpp>
@@ -39,12 +39,12 @@ void EngineCore::InitSingletons()
 {
 	FileHandler::GetSingleton().InitHandler(); // Should be initialized first since lots of classes rely on it
 	WindowFrame::GetSingleton().InitFrame();
-	InputHandler::GetSingleton().InitHandler();
 	TextureManager::GetSingleton().InitManager();
 	GraphicsRenderer::GetSingleton().InitRenderer();
 	ShaderManager::GetSingleton().InitManager();
 	FontLoaderTTF::GetSingleton().InitLoader();
 	PostProcessing::GetSingleton().InitProcess();
+	InputHandler::GetSingleton().InitHandler();
 
 	GameStateManager::GetSingleton().SwitchState(ResourceLoading::GetGameState());
 }
@@ -74,14 +74,9 @@ void EngineCore::UpdateTick(const float& DeltaTime)
 
 void EngineCore::RenderTick() const 
 {
-	// Render the scene to the post-processing FBO
+	// Render the state scenes to the post-processing FBO
 	GameStateManager::GetSingleton().RenderStates();
-
-	GraphicsRenderer::GetSingleton().RefreshScreen(PostProcessing::GetSingleton().GetFBO());
-	GraphicsRenderer::GetSingleton().FlushStack(*GameStateManager::GetSingleton().GetCurrentStateCamera(), 
-		PostProcessing::GetSingleton().GetFBO(), PostProcessing::GetSingleton().GetResolution().x, 
-		PostProcessing::GetSingleton().GetResolution().y);
-
+	
 	// Render the processed scene texture to the screen
 	PostProcessing::GetSingleton().RenderProcessedFrame();
 }

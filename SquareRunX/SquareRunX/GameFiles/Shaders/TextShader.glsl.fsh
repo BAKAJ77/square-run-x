@@ -13,5 +13,5 @@ out vec4 FragColor;
 void main()
 {
     vec4 SampledColor = vec4(1.0f, 1.0f, 1.0f, texture(FontBitmap, FshIn.UVCoords).r);
-    FragColor =  vec4(TextColor.rgb, 1.0f) * SampledColor;
+    FragColor = TextColor * SampledColor;
 }

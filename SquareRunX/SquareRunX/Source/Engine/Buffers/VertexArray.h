@@ -23,6 +23,8 @@ class VertexArray
 private:
 	uint32_t ID;
 	std::vector<VertexLayout> Layouts;
+
+	IndexBufferPtr AttachedIBO;
 public:
 	VertexArray();
 	~VertexArray();

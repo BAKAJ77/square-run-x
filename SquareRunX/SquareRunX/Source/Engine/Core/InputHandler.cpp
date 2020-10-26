@@ -1,5 +1,7 @@
 #include "InputHandler.h"
 #include "WindowFrame.h"
+#include "Engine/Graphics/PostProcessingState.h"
+
 #include <GLFW/glfw3.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -12,8 +14,10 @@ namespace Input
 	// Callback functions
 	void CursorPositionCallback(GLFWwindow* Window, double PosX, double PosY)
 	{
-		CursorPosition.x = static_cast<float>(PosX);
-		CursorPosition.y = static_cast<float>(PosY);
+		// Map the cursor position within the range of the ortho camera
+		CursorPosition.x = (1920.0f / static_cast<float>(WindowFrame::GetSingleton().GetWidth())) * static_cast<float>(PosX);
+		CursorPosition.y = (1080.0f / static_cast<float>(WindowFrame::GetSingleton().GetHeight())) *
+			(static_cast<float>(WindowFrame::GetSingleton().GetHeight()) - static_cast<float>(PosY));
 	}
 }
 

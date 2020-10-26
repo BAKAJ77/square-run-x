@@ -17,8 +17,8 @@ struct LoadedTexture
 class ResourceLoading : public GameStateBase
 {
 private:
-	std::array<LoadedFont, 2> GameFonts;
-	std::array<LoadedTexture, 5> GameTextures;
+	std::array<LoadedFont, 1> GameFonts;
+	std::array<LoadedTexture, 12> GameTextures;
 
 	float LoadingWheelRotation = 0.0f;
 	bool LoadingWheelLoaded = false, FinishedLoading = false;

@@ -1,5 +1,5 @@
 #include "ResourceLoading.h"
-#include "MainMenu.h"
+#include "Game/States/Menus/MainMenu.h"
 
 #include <thread>
 #include <chrono>
@@ -28,6 +28,24 @@ void ResourceLoading::LoadGameTextures()
         TextureManager::GetSingleton().LoadTexture("LOADING_WHEEL", "GameFiles/Textures/LOADING_WHEEL.png") };
     this->GameTextures[2] = { "Tile-Sheet",
         TextureManager::GetSingleton().LoadTexture("TILE_SHEET", "GameFiles/Textures/TILE_SHEET.png") };
+    this->GameTextures[3] = { "Menu-Title",
+        TextureManager::GetSingleton().LoadTexture("MENU_TITLE", "GameFiles/Textures/MENU_TITLE.png") };
+    this->GameTextures[4] = { "Controls-Title",
+        TextureManager::GetSingleton().LoadTexture("CONTROLS_TITLE", "GameFiles/Textures/CONTROLS_TITLE.png") };
+    this->GameTextures[5] = { "Button-Img",
+        TextureManager::GetSingleton().LoadTexture("BUTTON_BKG", "GameFiles/Textures/BUTTON_BKG.png") };
+    this->GameTextures[6] = { "Keybinds-Img",
+        TextureManager::GetSingleton().LoadTexture("KEYBINDS_IMG", "GameFiles/Textures/KEYBIND_DISPLAY.png") };
+    this->GameTextures[7] = { "Transition-1",
+        TextureManager::GetSingleton().LoadTexture("TRANSITION_1", "GameFiles/Textures/TRANSITION_1.png") };
+    this->GameTextures[8] = { "Transition-2",
+        TextureManager::GetSingleton().LoadTexture("TRANSITION_2", "GameFiles/Textures/TRANSITION_2.png") };
+    this->GameTextures[9] = { "Leaderboard-Title",
+        TextureManager::GetSingleton().LoadTexture("LEADERBOARD_TITLE", "GameFiles/Textures/LEADERBOARD_TITLE.png") };
+    this->GameTextures[10] = { "Leaderboard-Skin",
+        TextureManager::GetSingleton().LoadTexture("LEADERBOARD_BKG", "GameFiles/Textures/LEADERBOARD_BKG.png") };
+    this->GameTextures[11] = { "Button-Box",
+        TextureManager::GetSingleton().LoadTexture("BUTTON_BOX", "GameFiles/Textures/BUTTON_BOX.png") };
 }
 
 void ResourceLoading::LoadGameAudio()
@@ -37,7 +55,7 @@ void ResourceLoading::LoadGameAudio()
 
 void ResourceLoading::LoadGameLevelMaps()
 {
-    std::this_thread::sleep_for(5s); // Pause the loading thread for a bit
+    std::this_thread::sleep_for(2s); // Pause the loading thread for a bit
 
     // Load the playable levels required by the game
 
@@ -62,12 +80,7 @@ void ResourceLoading::DestroyState() {}
 
 void ResourceLoading::UpdateTick(const float& DeltaTime)
 {
-    // If finished loading then smoothly reduce opacity of this state rendering
-    if (this->FinishedLoading)
-        this->HandleTransitions(TransitionType::HIDE);
-
-    // Once completely transparent, switch to next game state which is the Main Menu
-    if (PostProcessing::GetSingleton().GetOpacity() == 0.0f)
+    if(this->FinishedLoading)
         this->SwitchState(MainMenu::GetGameState());
 
     this->LoadingWheelRotation += 425.0f * DeltaTime; // Update rotation position of the loading wheel

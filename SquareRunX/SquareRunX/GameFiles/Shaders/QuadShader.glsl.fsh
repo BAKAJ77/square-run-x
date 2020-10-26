@@ -2,8 +2,11 @@
 
 struct Material
 {
-    sampler2D DiffuseMap;
+    sampler2D Texture;
     bool Emissive;
+
+    float BrightnessThreshold;
+    float OpacityMultiplier;
 };
 
 in VSH_OUT
@@ -16,6 +19,8 @@ out vec4 FragColor;
 
 void main()
 {
-    vec4 TextureColor = texture(Mat.DiffuseMap, FshIn.UVCoords);
+    vec4 TextureColor = texture(Mat.Texture, FshIn.UVCoords) * Mat.BrightnessThreshold;
+    TextureColor.a *= Mat.OpacityMultiplier;
+
     FragColor = TextureColor;
 }

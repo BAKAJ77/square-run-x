@@ -21,6 +21,7 @@ struct QuadRender
 
 	std::vector<glm::mat4> ModelMatrices;
 	bool ScreenSpace = false, Emissive = false;
+	float BrightnessThreshold = 1.0f, OpacityMultiplier = 1.0f;
 };
 
 struct TextRender
@@ -66,21 +67,28 @@ private:
 public:
 	void SetClearColor(const glm::vec3& Color);
 
+	/*
+	* NOTE: Lower layers are drawn further top.
+	*/
 	void RenderText(const glm::vec2& Pos, const uint32_t& FontSize, const std::string& Text, const Font& CurrentFont, 
 		const glm::vec4& Color = { 0.0f, 0.0f, 0.0f, 1.0f }) const;
 
 	/*
 	* NOTE: 'Source' is the dimensions defining which part of the texture is sampled and
 	* 'Destination' defines the screen position and size of the textured quad to be rendered.
+	* 
+	* NOTE: Lower layers are drawn further top.
 	*/
 	void RenderQuad(const Rect& Source, const Rect& Destination, const Texture& QuadTexture, 
-		float RotationAngle = 0.0f, bool ScreenSpace = false, bool Emissive = false) const;
+		float RotationAngle = 0.0f, bool ScreenSpace = false, bool Emissive = false, float BrightnessThreshold = 1.0f,
+		float OpacityMultiplier = 1.0f) const;
 
 	void RefreshScreen(const FrameBufferPtr& RenderingFBO = nullptr) const;
 	void FlushStack(const OrthoCamera& Camera, const FrameBufferPtr& RenderingFBO = nullptr, int ResolutionWidth = 2560,
 		int ResolutionHeight = 1440) const;
 public:
 	static GraphicsRenderer& GetSingleton();
+	glm::vec2 GetTextSize(const std::string& Text, const Font& CurrentFont, uint32_t FontSize) const;
 };
 
 static bool operator==(const Rect& First, const Rect& Second)

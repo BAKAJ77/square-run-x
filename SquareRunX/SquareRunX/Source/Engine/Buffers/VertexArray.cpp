@@ -7,11 +7,14 @@ VertexArray::~VertexArray() { glDeleteVertexArrays(1, &this->ID); }
 
 void VertexArray::AttachBuffers(const VertexBufferPtr& VBO, const IndexBufferPtr& IBO)
 {
+	if(IBO)
+		this->AttachedIBO = IBO;
+
 	// Bind the VAO and the buffers
 	glBindVertexArray(this->ID);
 	VBO->BindBuffer();
-	if (IBO)
-		IBO->BindBuffer();
+	if (this->AttachedIBO)
+		this->AttachedIBO->BindBuffer();
 
 	// Define the vertex attribs for OpenGL to interpret for use in shaders
 	for (const auto& Layout : this->Layouts)
@@ -22,13 +25,14 @@ void VertexArray::AttachBuffers(const VertexBufferPtr& VBO, const IndexBufferPtr
 		glVertexAttribDivisor(Layout.Index, Layout.Divisor);
 	}
 
+	this->Layouts.clear();
+
 	// Unbind the VAO and the buffers
 	glBindVertexArray(0);
-	VBO->UnbindBuffer();
-	if (IBO)
-		IBO->UnbindBuffer();
 
-	this->Layouts.clear();
+	VBO->UnbindBuffer();
+	if (this->AttachedIBO)
+		this->AttachedIBO->UnbindBuffer();
 }
 
 void VertexArray::BindVertexArray() const { glBindVertexArray(this->ID); }

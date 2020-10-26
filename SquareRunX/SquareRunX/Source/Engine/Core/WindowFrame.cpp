@@ -5,6 +5,18 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+namespace
+{
+	// These pointers are for the callback function so it can access the window size variables
+	uint32_t* WidthPtr = nullptr, *HeightPtr = nullptr;
+}
+
+void WindowResizeCallback(GLFWwindow* Window, int Width, int Height)
+{
+	*WidthPtr = static_cast<uint32_t>(Width);
+	*HeightPtr = static_cast<uint32_t>(Height);
+}
+
 WindowFrame::WindowFrame() :
 	Width(0), Height(0), LibraryWindow(nullptr)
 {}
@@ -13,6 +25,10 @@ WindowFrame::~WindowFrame() {}
 
 void WindowFrame::InitFrame()
 {
+	// Set the pointers to point to the window size variables
+	WidthPtr = &this->Width;
+	HeightPtr = &this->Height;
+
 	// Retrieve the window properties from the config file
 	CFGConfigLoader::GetSingleton().OpenFile("WindowOptions");
 	this->Width = CFGElement::ToDataValue<int>(*CFGConfigLoader::GetSingleton().QueryElement("Width"));
@@ -39,6 +55,7 @@ void WindowFrame::InitFrame()
 		LogManager::GetSingleton().OutputLog("Failed to create the window.", LogLevel::FATAL);
 
 	glfwMakeContextCurrent(this->LibraryWindow);
+	glfwSetWindowSizeCallback(this->LibraryWindow, WindowResizeCallback);
 	
 	// Set the position of the window to the centre of the monitor
 	const GLFWvidmode* VIDEO_MODE = glfwGetVideoMode(glfwGetPrimaryMonitor());

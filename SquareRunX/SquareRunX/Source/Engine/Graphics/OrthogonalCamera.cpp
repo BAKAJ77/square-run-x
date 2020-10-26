@@ -22,7 +22,7 @@ glm::mat4 OrthoCamera::GetViewMatrix() const
 
 glm::mat4 OrthoCamera::GetProjectionMatrix() const
 {
-	return glm::ortho(0.0f, this->ViewSize.x, 0.0f, this->ViewSize.y);
+	return glm::ortho(0.0f, this->ViewSize.x, 0.0f, this->ViewSize.y, 0.0f, 100.0f);
 }
 
 const glm::vec2& OrthoCamera::GetPosition() const { return this->Position; }
