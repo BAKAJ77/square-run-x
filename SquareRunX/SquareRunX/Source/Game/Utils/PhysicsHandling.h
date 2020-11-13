@@ -9,7 +9,7 @@ enum class ColliderSide
 
 namespace PhysicsConstants
 {
-	static constexpr float GRAVITY = 0.0075f, TERMINAL_VELOCITY = 1.5f;
+	static constexpr float GRAVITY = 0.0075f, TERMINAL_VELOCITY = 2.0f;
 }
 
 class ColliderBox
