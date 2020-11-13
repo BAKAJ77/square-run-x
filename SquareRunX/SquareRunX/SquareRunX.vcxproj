@@ -25,12 +25,18 @@
     <ClInclude Include="Source\Engine\Buffers\TextureBuffer.h" />
     <ClInclude Include="Source\Engine\Buffers\VertexArray.h" />
     <ClInclude Include="Source\Engine\Buffers\VertexBuffer.h" />
+    <ClInclude Include="Source\Engine\Core\AnimationSprite.h" />
     <ClInclude Include="Source\Engine\Core\EngineCore.h" />
     <ClInclude Include="Source\Engine\Core\GameStateBase.h" />
     <ClInclude Include="Source\Engine\Core\GameStateManager.h" />
     <ClInclude Include="Source\Engine\Core\InputHandler.h" />
     <ClInclude Include="Source\Engine\Core\WindowFrame.h" />
+    <ClInclude Include="Source\Engine\Debug\PerformanceCounter.h" />
     <ClInclude Include="Source\Engine\Debug\LoggingManager.h" />
+    <ClInclude Include="Source\Engine\External\rapidxml\rapidxml.hpp" />
+    <ClInclude Include="Source\Engine\External\rapidxml\rapidxml_iterators.hpp" />
+    <ClInclude Include="Source\Engine\External\rapidxml\rapidxml_print.hpp" />
+    <ClInclude Include="Source\Engine\External\rapidxml\rapidxml_utils.hpp" />
     <ClInclude Include="Source\Engine\Filesystem\CFGConfigLoader.h" />
     <ClInclude Include="Source\Engine\Filesystem\FileHandler.h" />
     <ClInclude Include="Source\Engine\Graphics\GraphicsRenderer.h" />
@@ -39,12 +45,20 @@
     <ClInclude Include="Source\Engine\Graphics\ShaderManager.h" />
     <ClInclude Include="Source\Engine\Graphics\TextureManager.h" />
     <ClInclude Include="Source\Engine\Graphics\FontLoaderTTF.h" />
+    <ClInclude Include="Source\Game\Entities\EntityBase.h" />
+    <ClInclude Include="Source\Game\Entities\PlayerEntity.h" />
     <ClInclude Include="Source\Game\States\Menus\ControlsMenu.h" />
     <ClInclude Include="Source\Game\States\Menus\LeaderboardMenu.h" />
     <ClInclude Include="Source\Game\States\Menus\MainMenu.h" />
+    <ClInclude Include="Source\Game\States\Menus\NewGameMenu.h" />
     <ClInclude Include="Source\Game\States\Menus\PlayMenu.h" />
+    <ClInclude Include="Source\Game\States\Other\GameplayState.h" />
     <ClInclude Include="Source\Game\States\Other\ResourceLoading.h" />
     <ClInclude Include="Source\Game\Utils\ButtonObject.h" />
+    <ClInclude Include="Source\Game\Utils\GameSave.h" />
+    <ClInclude Include="Source\Game\Utils\LevelLoader.h" />
+    <ClInclude Include="Source\Game\Utils\ParallaxHandler.h" />
+    <ClInclude Include="Source\Game\Utils\PhysicsHandling.h" />
     <ClInclude Include="Source\Game\Utils\TileObject.h" />
     <ClInclude Include="Source\Game\Utils\TransitionHandler.h" />
   </ItemGroup>
@@ -55,13 +69,15 @@
     <ClCompile Include="Source\Engine\Buffers\TextureBuffer.cpp" />
     <ClCompile Include="Source\Engine\Buffers\VertexArray.cpp" />
     <ClCompile Include="Source\Engine\Buffers\VertexBuffer.cpp" />
+    <ClCompile Include="Source\Engine\Core\AnimationSprite.cpp" />
     <ClCompile Include="Source\Engine\Core\EngineCore.cpp" />
     <ClCompile Include="Source\Engine\Core\GameStateManager.cpp" />
     <ClCompile Include="Source\Engine\Core\InputHandler.cpp" />
     <ClCompile Include="Source\Engine\Core\WindowFrame.cpp" />
+    <ClCompile Include="Source\Engine\Debug\PerformanceCounter.cpp" />
     <ClCompile Include="Source\Engine\Debug\LoggingManager.cpp" />
-    <ClCompile Include="Source\Engine\External\glad.c" />
-    <ClCompile Include="Source\Engine\External\stb_image.cpp" />
+    <ClCompile Include="Source\Engine\External\glad\glad.c" />
+    <ClCompile Include="Source\Engine\External\stb\stb_image.cpp" />
     <ClCompile Include="Source\Engine\Filesystem\CFGConfigLoader.cpp" />
     <ClCompile Include="Source\Engine\Filesystem\FileHandler.cpp" />
     <ClCompile Include="Source\Engine\Graphics\FontLoaderTTF.cpp" />
@@ -70,12 +86,19 @@
     <ClCompile Include="Source\Engine\Graphics\PostProcessingState.cpp" />
     <ClCompile Include="Source\Engine\Graphics\ShaderManager.cpp" />
     <ClCompile Include="Source\Engine\Graphics\TextureManager.cpp" />
+    <ClCompile Include="Source\Game\Entities\EntityBase.cpp" />
+    <ClCompile Include="Source\Game\Entities\PlayerEntity.cpp" />
     <ClCompile Include="Source\Game\States\Menus\ControlsMenu.cpp" />
     <ClCompile Include="Source\Game\States\Menus\LeaderboardMenu.cpp" />
     <ClCompile Include="Source\Game\States\Menus\MainMenu.cpp" />
+    <ClCompile Include="Source\Game\States\Menus\NewGameState.cpp" />
     <ClCompile Include="Source\Game\States\Menus\PlayMenu.cpp" />
+    <ClCompile Include="Source\Game\States\Other\GameplayState.cpp" />
     <ClCompile Include="Source\Game\States\Other\ResourceLoading.cpp" />
     <ClCompile Include="Source\Game\Utils\ButtonObject.cpp" />
+    <ClCompile Include="Source\Game\Utils\LevelLoader.cpp" />
+    <ClCompile Include="Source\Game\Utils\ParallaxHandling.cpp" />
+    <ClCompile Include="Source\Game\Utils\PhysicsHandling.cpp" />
     <ClCompile Include="Source\Game\Utils\TileObject.cpp" />
   </ItemGroup>
   <ItemGroup>

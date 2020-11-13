@@ -6,8 +6,8 @@ class ControlsMenu : public GameStateBase
 {
 private:
 	// Scene related things
-	const Font* ArialRoundedFont = nullptr;
-	const Texture* ControlsTitleTex = nullptr, *KeybindsTex = nullptr, *TransitionTex1 = nullptr, *TransitionTex2 = nullptr;
+	const Font* ArialRoundedFont = nullptr, *SansSerifShadedFont = nullptr;
+	const Texture* KeybindsTex = nullptr, *TransitionTex1 = nullptr, *TransitionTex2 = nullptr;
 	Button BackButton;
 
 	// Backend transition things
@@ -20,7 +20,7 @@ public:
 	void InitState() override;
 	void DestroyState() override;
 
-	void UpdateTick(const float& DeltaTime) override;
+	void UpdateTick(const double& DeltaTime) override;
 	void RenderFrame() const override;
 public:
 	static ControlsMenu* GetGameState();

@@ -1,7 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <unordered_map>
 
-enum class InputCode
+enum class InputCode : uint16_t
 {
 	/* Regular keys */
 	KEY_SPACE =            32,
@@ -144,9 +145,18 @@ enum class InputCode
 	MOUSE_BUTTON_MIDDLE =  MOUSE_BUTTON_3
 };
 
+enum class KeyState : uint8_t
+{
+	PRESSED,
+	RELEASED,
+	REPEAT
+};
+
 class InputHandler
 {
 	friend class EngineCore;
+private:
+	std::unordered_map<InputCode, KeyState> KeyStates;
 private:
 	InputHandler();
 	~InputHandler();
@@ -154,8 +164,10 @@ private:
 	void InitHandler();
 public:
 	bool WasKeyPressed(InputCode Key) const;
-	bool WasMouseButtonClicked(InputCode Button) const;
+	bool WasKeyReleased(InputCode Key) const;
+	bool IsKeyHeld(InputCode Key) const;
 
+	bool WasMouseButtonClicked(InputCode Button) const;
 	const glm::vec2& GetMousePosition() const;
 public:
 	static InputHandler& GetSingleton();

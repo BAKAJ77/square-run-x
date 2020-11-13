@@ -31,10 +31,13 @@ void WindowFrame::InitFrame()
 
 	// Retrieve the window properties from the config file
 	CFGConfigLoader::GetSingleton().OpenFile("WindowOptions");
+	
 	this->Width = CFGElement::ToDataValue<int>(*CFGConfigLoader::GetSingleton().QueryElement("Width"));
 	this->Height = CFGElement::ToDataValue<int>(*CFGConfigLoader::GetSingleton().QueryElement("Height"));
 	const bool FULLSCREEN = CFGElement::ToDataValue<bool>(*CFGConfigLoader::GetSingleton().QueryElement("Fullscreen"));
 	const bool RESIZABLE = CFGElement::ToDataValue<bool>(*CFGConfigLoader::GetSingleton().QueryElement("Resizable"));
+	const bool VSYNC_ENABLED = CFGElement::ToDataValue<bool>(*CFGConfigLoader::GetSingleton().QueryElement("VSyncEnabled"));
+	
 	CFGConfigLoader::GetSingleton().CloseFile();
 
 	// Initialize the GLFW library before creating window
@@ -56,6 +59,9 @@ void WindowFrame::InitFrame()
 
 	glfwMakeContextCurrent(this->LibraryWindow);
 	glfwSetWindowSizeCallback(this->LibraryWindow, WindowResizeCallback);
+
+	if(VSYNC_ENABLED)
+		glfwSwapInterval(1);
 	
 	// Set the position of the window to the centre of the monitor
 	const GLFWvidmode* VIDEO_MODE = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -70,6 +76,8 @@ void WindowFrame::InitFrame()
 
 	// Output the OpenGL context version (Not necessary)
 	LogManager::GetSingleton().OutputLog(reinterpret_cast<const char*>(glGetString(GL_VERSION)), LogLevel::INFO);
+
+	this->WindowStartTime = std::chrono::high_resolution_clock::now(); // Get current (start) time of window execution
 }
 
 void WindowFrame::DestroyFrame() { glfwTerminate(); }
@@ -101,4 +109,9 @@ const uint32_t& WindowFrame::GetWidth() const { return this->Width; }
 
 const uint32_t& WindowFrame::GetHeight() const { return this->Height; }
 
-float WindowFrame::GetTick() const { return static_cast<float>(glfwGetTime()); }
+double WindowFrame::GetTick() const 
+{ 
+	const auto CURRENT_TIME_TICK = std::chrono::high_resolution_clock::now();
+	return std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+		CURRENT_TIME_TICK - this->WindowStartTime).count();
+}

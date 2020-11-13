@@ -1,15 +1,17 @@
 #pragma once
-#include "Engine/Graphics/OrthogonalCamera.h"
+#include "Engine/Debug/PerformanceCounter.h"
 
 class EngineCore
 {
 private:
-	OrthoCamera Camera;
+	mutable PerformanceCounter PerfCounter;
+	bool DisplayPerformanceCounter;
 private:
 	void InitSingletons();
+	void LoadConfigSettings();
 
 	void MainLoop();
-	void UpdateTick(const float& DeltaTime);
+	void UpdateTick(const double& DeltaTime);
 	void RenderTick() const;
 public:
 	EngineCore();

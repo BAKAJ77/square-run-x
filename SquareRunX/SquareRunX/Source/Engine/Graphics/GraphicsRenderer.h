@@ -11,13 +11,32 @@
 
 struct Rect
 {
-	int x = 0, y = 0, w = 0, h = 0;
+public:
+	double x, y, w, h;
+public:
+	Rect() :
+		x(0.0), y(0.0), w(0.0), h(0.0)
+	{}
+
+	Rect(int x, int y, int w, int h)
+	{
+		this->x = static_cast<double>(x);
+		this->y = static_cast<double>(y);
+		this->w = static_cast<double>(w);
+		this->h = static_cast<double>(h);
+	}
+
+	Rect(double x, double y, double w, double h) :
+		x(x), y(y), w(w), h(h)
+	{}
 };
 
 struct QuadRender
 {
-	const Texture* DiffuseMap;
+	const Texture* DiffuseMap = nullptr;
 	const Rect TextureAtlas; // AKA 'Source'
+
+	glm::vec4 Color; // Used if not using textured quad
 
 	std::vector<glm::mat4> ModelMatrices;
 	bool ScreenSpace = false, Emissive = false;
@@ -71,7 +90,7 @@ public:
 	* NOTE: Lower layers are drawn further top.
 	*/
 	void RenderText(const glm::vec2& Pos, const uint32_t& FontSize, const std::string& Text, const Font& CurrentFont, 
-		const glm::vec4& Color = { 0.0f, 0.0f, 0.0f, 1.0f }) const;
+		const glm::vec4& Color = { 0.0f, 0.0f, 0.0f, 1.0f }, bool RaiseText = false) const;
 
 	/*
 	* NOTE: 'Source' is the dimensions defining which part of the texture is sampled and
@@ -80,8 +99,11 @@ public:
 	* NOTE: Lower layers are drawn further top.
 	*/
 	void RenderQuad(const Rect& Source, const Rect& Destination, const Texture& QuadTexture, 
-		float RotationAngle = 0.0f, bool ScreenSpace = false, bool Emissive = false, float BrightnessThreshold = 1.0f,
+		double RotationAngle = 0.0, bool ScreenSpace = false, bool Emissive = false, float BrightnessThreshold = 1.0f,
 		float OpacityMultiplier = 1.0f) const;
+
+	void RenderFillQuad(const Rect& Destination, const glm::vec4& QuadColor, double RotationAngle = 0.0, 
+		bool ScreenSpace = false, bool Emissive = false) const;
 
 	void RefreshScreen(const FrameBufferPtr& RenderingFBO = nullptr) const;
 	void FlushStack(const OrthoCamera& Camera, const FrameBufferPtr& RenderingFBO = nullptr, int ResolutionWidth = 2560,

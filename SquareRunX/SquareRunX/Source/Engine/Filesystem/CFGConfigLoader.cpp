@@ -13,6 +13,8 @@ CFGConfigLoader& CFGConfigLoader::GetSingleton()
 
 void CFGConfigLoader::OpenFile(const std::string& FileName)
 {
+	this->ConfigElements.clear();
+
 	// Append the .cfg extension if it's not included in file name
 	if(FileName.find(".cfg") == std::string::npos)
 		FileHandler::GetSingleton().OpenFile("CONFIG_FILE", ("GameFiles/Configs/" + FileName + ".cfg").c_str());

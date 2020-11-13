@@ -29,6 +29,7 @@ public:
 	template<> void SetUniform<int>(const std::string& Uniform, int value) const;
 	template<> void SetUniform<bool>(const std::string& Uniform, bool value) const;
 	template<> void SetUniform<float>(const std::string& Uniform, float value) const;
+	template<> void SetUniform<double>(const std::string& Uniform, double value) const;
 
 	template<typename T> void SetUniformEx(const std::string& Uniform, const T& values) const;
 	template<> void SetUniformEx<glm::vec2>(const std::string& Uniform, const glm::vec2& values) const;
@@ -36,6 +37,7 @@ public:
 	template<> void SetUniformEx<glm::vec4>(const std::string& Uniform, const glm::vec4& values) const;
 	template<> void SetUniformEx<glm::mat3>(const std::string& Uniform, const glm::mat3& values) const;
 	template<> void SetUniformEx<glm::mat4>(const std::string& Uniform, const glm::mat4& values) const;
+	template<> void SetUniformEx<glm::dmat4>(const std::string& Uniform, const glm::dmat4& values) const;
 };
 
 #include "ShaderManager.tpp"

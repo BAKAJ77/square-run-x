@@ -15,8 +15,8 @@ private:
 	std::vector<PlayerData> LeaderboardArray;
 
 	// Scene related things
-	const Font* ArialRoundedFont = nullptr;
-	const Texture* LeaderboardTitleTex = nullptr, *TransitionTex1 = nullptr, *TransitionTex2 = nullptr,
+	const Font* ArialRoundedFont = nullptr, *SansSerifShadedFont = nullptr;
+	const Texture* TransitionTex1 = nullptr, *TransitionTex2 = nullptr,
 		*LeaderboardSkinTex = nullptr;
 	Button BackButton;
 
@@ -33,7 +33,7 @@ public:
 	void InitState() override;
 	void DestroyState() override;
 
-	void UpdateTick(const float& DeltaTime) override;
+	void UpdateTick(const double& DeltaTime) override;
 	void RenderFrame() const override;
 public:
 	static LeaderboardMenu* GetGameState();

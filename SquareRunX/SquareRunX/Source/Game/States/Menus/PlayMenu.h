@@ -13,14 +13,17 @@ private:
 	// Backend transition things
 	Rect TransitionDest1, TransitionDest2;
 	float OpacityMultiplier = 0.0f;
-	bool TransitionComplete = false;
+	bool TransitionComplete = false, PausedState = false;
 public:
 	bool PreStageComplete = false, StageOneComplete = false, EndOfState = false; // Needed by 'back' button execute function
 public:
 	void InitState() override;
 	void DestroyState() override;
 
-	void UpdateTick(const float& DeltaTime) override;
+	void PauseState() override;
+	void ResumeState() override;
+
+	void UpdateTick(const double& DeltaTime) override;
 	void RenderFrame() const override;
 public:
 	static PlayMenu* GetGameState();

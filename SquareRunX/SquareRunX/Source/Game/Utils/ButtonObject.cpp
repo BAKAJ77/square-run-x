@@ -1,14 +1,20 @@
 #include "ButtonObject.h"
 #include "Engine/Core/InputHandler.h"
+#include "Engine/Core/WindowFrame.h"
+
+namespace 
+{
+	constexpr float BUTTON_CLICK_COOLDOWN = 500.0;
+}
 
 Button::Button() :
-	ButtonBKGTex(nullptr), ButtonTextFont(nullptr), BrightnessThreshold(1.0f)
+	ButtonBKGTex(nullptr), ButtonTextFont(nullptr), BrightnessThreshold(1.0f), FontSize(48)
 {}
 
 Button::Button(const Rect& TextureAtlas, const Rect& Destination, const Texture& BKGTexture, const Font& TextFont, 
-	const std::string& Text, const std::function<void()>& Function) :
+	const std::string& Text, const std::function<void()>& Function, uint32_t FontSize, const glm::vec3& TextColor) :
 	TextureAtlas(TextureAtlas), ButtonBKGTex(&BKGTexture), ButtonTextFont(&TextFont), ExecutableFunction(Function),
-	ButtonText(Text), BrightnessThreshold(1.0f), Destination(Destination)
+	ButtonText(Text), BrightnessThreshold(1.0f), Destination(Destination), FontSize(FontSize), TextColor(TextColor)
 {}
 
 Button::~Button() {}
@@ -21,8 +27,14 @@ void Button::UpdateButton()
 	if (CURSOR_POS.x >= this->Destination.x && CURSOR_POS.x <= this->Destination.x + this->Destination.w &&
 		CURSOR_POS.y >= this->Destination.y && CURSOR_POS.y <= this->Destination.y + this->Destination.h)
 	{
-		if (InputHandler::GetSingleton().WasMouseButtonClicked(InputCode::MOUSE_BUTTON_LEFT))
+		static double PrevTime = 0.0;
+
+		if (InputHandler::GetSingleton().WasMouseButtonClicked(InputCode::MOUSE_BUTTON_LEFT) &&
+			WindowFrame::GetSingleton().GetTick() - PrevTime >= BUTTON_CLICK_COOLDOWN)
+		{
 			this->ExecutableFunction();
+			PrevTime = WindowFrame::GetSingleton().GetTick();
+		}
 
 		this->BrightnessThreshold = 1.5f;
 	}
@@ -30,19 +42,19 @@ void Button::UpdateButton()
 		this->BrightnessThreshold = 1.0f;
 }
 
-void Button::RenderButton(float Opacity) const
+void Button::RenderButton(float Opacity, int TextOffset) const
 {
 	// Render the background of button
 	GraphicsRenderer::GetSingleton().RenderQuad(this->TextureAtlas, this->Destination, *this->ButtonBKGTex, 0.0f, true, false,
 		this->BrightnessThreshold, Opacity);
 
 	// Calculate where the text will be positioned
-	constexpr int OFFSET_WEIGHT = 10;
-	const glm::vec2 TEXT_SIZE = GraphicsRenderer::GetSingleton().GetTextSize(this->ButtonText, *this->ButtonTextFont, 48);
-	const glm::vec2 TEXT_POS = { ((this->Destination.x + (this->Destination.w / 2)) - (TEXT_SIZE.x / 2)) + OFFSET_WEIGHT,
+	const glm::vec2 TEXT_SIZE = GraphicsRenderer::GetSingleton().GetTextSize(this->ButtonText, *this->ButtonTextFont, 
+		this->FontSize);
+	const glm::vec2 TEXT_POS = { ((this->Destination.x + (this->Destination.w / 2)) - (TEXT_SIZE.x / 2)) + TextOffset,
 		(this->Destination.y + (this->Destination.h / 2)) - (TEXT_SIZE.y / 2) };
 
 	// Render the text on top of button
-	GraphicsRenderer::GetSingleton().RenderText(TEXT_POS, 48, this->ButtonText, *this->ButtonTextFont, 
-		{ glm::vec3(0.0f), Opacity });
+	GraphicsRenderer::GetSingleton().RenderText(TEXT_POS, this->FontSize, this->ButtonText, *this->ButtonTextFont, 
+		{ this->TextColor, Opacity });
 }

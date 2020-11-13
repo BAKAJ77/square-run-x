@@ -88,7 +88,7 @@ bool FileHandler::OpenFile(const std::string& Key, const char* RelativeFilePath,
 			auto& File = this->FileSlots[i];
 			if (!File.Stream.is_open())
 			{
-				if ((int)(OpenMode & FileFlags::WRITE_MODE) == 0x02)
+				if (((int)(OpenMode & FileFlags::WRITE_MODE) == 0x02) && ((int)(OpenMode & FileFlags::TRUNCATE_MODE) == 0x0))
 				{
 					OpenMode |= 0x08;
 				}

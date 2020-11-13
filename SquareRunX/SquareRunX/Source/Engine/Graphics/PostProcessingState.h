@@ -21,7 +21,9 @@ private:
 	const ShaderProgram* PostProcessShader;
 
 	glm::ivec2 Resolution;
-	float Gamma, Opacity;
+	float Gamma;
+	double Opacity;
+
 	int NumSamplesMS;
 private:
 	PostProcessing();
@@ -29,12 +31,12 @@ private:
 
 	void InitProcess();
 public:
-	void SetOpacityLevel(float Alpha);
+	void SetOpacityLevel(double Alpha);
 	void RenderProcessedFrame() const;
 public:
 	static PostProcessing& GetSingleton();
 
 	const FrameBufferPtr& GetFBO() const;
-	const float& GetOpacity() const;
+	const double& GetOpacity() const;
 	glm::ivec2 GetResolution() const;
 };

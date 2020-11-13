@@ -10,16 +10,19 @@ private:
 	
 	Rect TextureAtlas, Destination;
 	std::string ButtonText;
-	std::function<void()> ExecutableFunction;
+	glm::vec3 TextColor;
 
 	float BrightnessThreshold;
-	size_t FontSize;
+	uint32_t FontSize;
+	
+	std::function<void()> ExecutableFunction;
 public:
 	Button();
 	Button(const Rect& TextureAtlas, const Rect& Destination, const Texture& BKGTexture, const Font& TextFont, 
-		const std::string& Text, const std::function<void()>& Function);
+		const std::string& Text, const std::function<void()>& Function, uint32_t FontSize = 48, 
+		const glm::vec3& TextColor = glm::vec3(0.0f));
 	~Button();
 
 	void UpdateButton();
-	void RenderButton(float Opacity = 1.0f) const;
+	void RenderButton(float Opacity = 1.0f, int TextOffset = 10) const;
 };

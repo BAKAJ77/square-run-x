@@ -13,9 +13,9 @@ void LeaderboardMenu::InitState()
 {
 	// Get the fonts needed
 	this->ArialRoundedFont = ResourceLoading::GetGameState()->GetFont("Arial-Rounded");
+	this->SansSerifShadedFont = ResourceLoading::GetGameState()->GetFont("Sans-Serif-Shaded");
 
 	// Get the textures needed
-	this->LeaderboardTitleTex = ResourceLoading::GetGameState()->GetTexture("Leaderboard-Title");
 	this->LeaderboardSkinTex = ResourceLoading::GetGameState()->GetTexture("Leaderboard-Skin");
 	this->TransitionTex1 = ResourceLoading::GetGameState()->GetTexture("Transition-1");
 	this->TransitionTex2 = ResourceLoading::GetGameState()->GetTexture("Transition-2");
@@ -26,8 +26,8 @@ void LeaderboardMenu::InitState()
 		[=]() { this->EndOfState = true; this->StageOneComplete = false; this->PreStageComplete = false; });
 
 	// Initialize other stuff
-	this->TransitionDest1 = { 0, -1400, (int)this->SceneCamera.GetViewSize().x, 1400 };
-	this->TransitionDest2 = { (int)this->SceneCamera.GetViewSize().x + 600, 0, 600, (int)this->SceneCamera.GetViewSize().y };
+	this->TransitionDest1 = { 0.0, -1400.0, this->SceneCamera.GetViewSize().x, 1400.0 };
+	this->TransitionDest2 = { this->SceneCamera.GetViewSize().x + 600, 0.0, 600.0, this->SceneCamera.GetViewSize().y };
 
 	this->ExtractLeaderboardData();
 }
@@ -40,7 +40,7 @@ void LeaderboardMenu::DestroyState()
 	this->EndOfState = false;
 }
 
-void LeaderboardMenu::UpdateTick(const float& DeltaTime)
+void LeaderboardMenu::UpdateTick(const double& DeltaTime)
 {
 	if (this->TransitionComplete && !this->EndOfState)
 	{
@@ -65,15 +65,12 @@ void LeaderboardMenu::RenderFrame() const
 	Rect SourceRect, DestinationRect;
 
 	// Render the leaderboard menu title
-	SourceRect = { 0, 0, 795, 100 };
-	DestinationRect = { 40, 940, SourceRect.w, SourceRect.h };
-
-	GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, DestinationRect, *this->LeaderboardTitleTex, 0.0f, true, false,
-		1.0f, this->OpacityMultiplier);
+	GraphicsRenderer::GetSingleton().RenderText({ 40, 940 }, 100, "LEADERBOARD", *this->SansSerifShadedFont,
+		{ glm::vec3(0.0f), this->OpacityMultiplier });
 
 	// Render the leaderboard skin texture
 	SourceRect = { 0, 0, 1580, 700 };
-	DestinationRect = { 30, 210, (int)(SourceRect.w / 1.1f), (int)(SourceRect.h / 1.1f) };
+	DestinationRect = { 30.0, 210.0, (SourceRect.w / 1.1f), (SourceRect.h / 1.1f) };
 
 	GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, DestinationRect, *this->LeaderboardSkinTex, 0.0f, true, false,
 		1.0f, this->OpacityMultiplier);
@@ -126,12 +123,12 @@ void LeaderboardMenu::RenderLeaderboardIndex(uint8_t Index) const
 
 void LeaderboardMenu::ExtractLeaderboardData()
 {
-	FileHandler::GetSingleton().OpenFile("Leaderboard-File", "GameFiles/Data/Leaderboard.dat");
+	FileHandler::GetSingleton().OpenFile("LEADERBOARD", "GameFiles/Data/Leaderboard.dat");
 
 	for (int i = 0; i < 3; i++)
 	{
 		// Extract the player data from leaderboard file
-		const std::string LOADED_LINE = FileHandler::GetSingleton().ReadData("Leaderboard-File", i + 1).str();
+		const std::string LOADED_LINE = FileHandler::GetSingleton().ReadData("LEADERBOARD", i + 1).str();
 		PlayerData Data;
 
 		if (!LOADED_LINE.empty())
@@ -145,5 +142,5 @@ void LeaderboardMenu::ExtractLeaderboardData()
 		this->LeaderboardArray.emplace_back(Data);
 	}
 
-	FileHandler::GetSingleton().CloseFile("Leaderboard-File");
+	FileHandler::GetSingleton().CloseFile("LEADERBOARD");
 }

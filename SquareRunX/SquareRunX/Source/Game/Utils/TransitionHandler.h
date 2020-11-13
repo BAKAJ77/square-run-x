@@ -5,28 +5,21 @@
 
 namespace TransitionHandling
 {
-	static constexpr float TRANSITION_SPEED = 4000.0f;
-	static constexpr float OPACITY_CHANGE_RATE = 0.1f;
-	static constexpr float OPACITY_TIME_STEP = 0.01f;
+	static constexpr float TRANSITION_SPEED = 4.0f;
+	static constexpr float OPACITY_CHANGE_RATE = 0.005f;
 
 	static void UpdateTransition(bool& TransitionComplete, bool& PreStageComplete, bool& StageOneComplete, bool& EndOfState,
 		Rect& TransitionDest1, Rect& TransitionDest2, float& OpacityMultiplier, const OrthoCamera& SceneCamera, 
-		const float& DeltaTime, const std::function<void()> PopStateFunc)
+		const double& DeltaTime, const std::function<void()> PopStateFunc)
 	{
-		static float PrevTime = 0.0f;
-
 		if (EndOfState)
 		{
 			if (!PreStageComplete)
 			{
-				if (WindowFrame::GetSingleton().GetTick() - PrevTime > OPACITY_TIME_STEP)
-				{
-					OpacityMultiplier = std::max(OpacityMultiplier - OPACITY_CHANGE_RATE, 0.0f);
-					PrevTime = WindowFrame::GetSingleton().GetTick();
+				OpacityMultiplier = static_cast<float>(std::max(OpacityMultiplier - (OPACITY_CHANGE_RATE * DeltaTime), 0.0));
 
-					if (OpacityMultiplier <= 0.0f)
-						PreStageComplete = true;
-				}
+				if (OpacityMultiplier <= 0.0f)
+					PreStageComplete = true;
 			}
 			else if (!StageOneComplete)
 			{
@@ -47,28 +40,28 @@ namespace TransitionHandling
 		{
 			if (!PreStageComplete)
 			{
+				TransitionDest1.y += (int)(TRANSITION_SPEED * DeltaTime);
 				if (TransitionDest1.y + 100 >= 0)
+				{
+					TransitionDest1.y = -100;
 					PreStageComplete = true;
-				else
-					TransitionDest1.y += (int)(TRANSITION_SPEED * DeltaTime);
+				}
 			}
 			else if(!StageOneComplete)
 			{
+				TransitionDest2.x -= (int)(TRANSITION_SPEED * DeltaTime);
 				if ((TransitionDest2.x + TransitionDest2.w) - 200 <= SceneCamera.GetViewSize().x)
+				{
+					TransitionDest2.x = (int)SceneCamera.GetViewSize().x - (TransitionDest2.w - 175);
 					StageOneComplete = true;
-				else
-					TransitionDest2.x -= (int)(TRANSITION_SPEED * DeltaTime);
+				}
 			}
 			else if (!TransitionComplete)
 			{
-				if (WindowFrame::GetSingleton().GetTick() - PrevTime > OPACITY_TIME_STEP)
-				{
-					OpacityMultiplier = std::min(OpacityMultiplier + OPACITY_CHANGE_RATE, 1.0f);
-					PrevTime = WindowFrame::GetSingleton().GetTick();
-
-					if (OpacityMultiplier >= 1.0f)
-						TransitionComplete = true;
-				}
+				OpacityMultiplier = static_cast<float>(std::min(OpacityMultiplier + (OPACITY_CHANGE_RATE * DeltaTime), 1.0));
+				
+				if (OpacityMultiplier >= 1.0f)
+					TransitionComplete = true;
 			}
 		}
 	}

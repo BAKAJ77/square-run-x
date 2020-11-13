@@ -1,5 +1,8 @@
 #pragma once
 #include "Engine/Core/GameStateBase.h"
+#include "Game/Utils/LevelLoader.h"
+
+#include <vector>
 #include <array>
 
 struct LoadedFont
@@ -17,10 +20,11 @@ struct LoadedTexture
 class ResourceLoading : public GameStateBase
 {
 private:
-	std::array<LoadedFont, 1> GameFonts;
-	std::array<LoadedTexture, 12> GameTextures;
+	std::array<LoadedFont, 3> GameFonts;
+	std::array<LoadedTexture, 17> GameTextures;
+	mutable std::vector<LevelMap> GameLevels;
 
-	float LoadingWheelRotation = 0.0f;
+	double LoadingWheelRotation = 0.0;
 	bool LoadingWheelLoaded = false, FinishedLoading = false;
 private:
 	void LoadGameFonts();
@@ -31,11 +35,12 @@ public:
 	void InitState() override;
 	void DestroyState() override;
 
-	void UpdateTick(const float& DeltaTime) override;
+	void UpdateTick(const double& DeltaTime) override;
 	void RenderFrame() const override;
 public:
 	static ResourceLoading* GetGameState();
 
 	const Font* GetFont(const std::string& FontName) const;
 	const Texture* GetTexture(const std::string& TextureName) const;
+	LevelMap* GetLevelMap(int LevelIndex, int ActIndex) const;
 };

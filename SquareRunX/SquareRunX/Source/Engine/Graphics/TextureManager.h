@@ -16,6 +16,9 @@ public:
 	Texture(const std::string& FilePath, const Texture2DPtr& TextureBuffer) :
 		FilePath(FilePath), TextureBuffer(TextureBuffer)
 	{}
+
+	const int GetWidth() const { return static_cast<int>(this->TextureBuffer->GetWidth()); }
+	const int GetHeight() const { return static_cast<int>(this->TextureBuffer->GetHeight()); }
 };
 
 class TextureManager

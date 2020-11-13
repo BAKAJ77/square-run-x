@@ -154,34 +154,89 @@ void GraphicsRenderer::BindShaderProgram(const ShaderProgram& Shader) const
 void GraphicsRenderer::SetClearColor(const glm::vec3& Color) { this->ClearColor = Color; }
 
 void GraphicsRenderer::RenderText(const glm::vec2& Pos, const uint32_t& FontSize, const std::string& Text, 
-	const Font& CurrentFont, const glm::vec4& Color) const
+	const Font& CurrentFont, const glm::vec4& Color, bool RaiseText) const
 {
 	// Calculate the model matrix
-	glm::mat4 Model;
-	Model = glm::translate(Model, glm::vec3(Pos, 0.0f));
-	Model = glm::scale(Model, glm::vec3(
-		glm::vec2(static_cast<float>(FontSize) / static_cast<float>(FontLoaderTTF::GetSingleton().GetFontQuality())), 1.0f));
+	if (!Text.empty())
+	{
+		if (RaiseText)
+		{
+			glm::mat4 Model;
+			Model = glm::translate(Model, glm::vec3(Pos - 5.0f, 0.0f));
+			Model = glm::scale(Model, glm::vec3(
+				glm::vec2(static_cast<float>(FontSize) / static_cast<float>(FontLoaderTTF::GetSingleton().GetFontQuality())), 
+				1.0f));
 
-	this->TextStack.push_back({ &CurrentFont, Text, Model, Color });
+			glm::vec3 DarkenedColor;
+			DarkenedColor.r = std::clamp(Color.r - 0.3f, 0.0f, 1.0f);
+			DarkenedColor.g = std::clamp(Color.g - 0.3f, 0.0f, 1.0f);
+			DarkenedColor.b = std::clamp(Color.b - 0.3f, 0.0f, 1.0f);
+
+			this->TextStack.push_back({ &CurrentFont, Text, Model, { DarkenedColor, Color.a } });
+		}
+
+		glm::mat4 Model;
+		Model = glm::translate(Model, glm::vec3(Pos, 0.0f));
+		Model = glm::scale(Model, glm::vec3(
+			glm::vec2(static_cast<float>(FontSize) / static_cast<float>(FontLoaderTTF::GetSingleton().GetFontQuality())), 1.0f));
+
+		this->TextStack.push_back({ &CurrentFont, Text, Model, Color });
+	}
 }
 
 void GraphicsRenderer::RenderQuad(const Rect& Source, const Rect& Destination, const Texture& QuadTexture, 
-	float RotationAngle, bool ScreenSpace, bool Emissive, float BrightnessThreshold, float OpacityMultiplier) const
+	double RotationAngle, bool ScreenSpace, bool Emissive, float BrightnessThreshold, float OpacityMultiplier) const
 {
 	// Construct the model matrix for the quad
-	glm::mat4 Model;
-	Model = glm::translate(Model, glm::vec3(Destination.x + (Destination.w / 2.0f), Destination.y + (Destination.h / 2.0f), 
-		0.0f));
-	Model = glm::scale(Model, glm::vec3(Destination.w, Destination.h, 1.0f));
-	Model = glm::rotate(Model, glm::radians(RotationAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::dmat4 Model;
+	Model = glm::translate(Model, glm::dvec3(Destination.x + (Destination.w / 2.0), Destination.y + (Destination.h / 2.0), 
+		0.0));
+	Model = glm::scale(Model, glm::dvec3(Destination.w, Destination.h, 1.0));
+	Model = glm::rotate(Model, glm::radians(RotationAngle), glm::dvec3(0.0, 0.0, 1.0));
 
 	// Next check whether another quad in the stack is indentical with the new quad
 	bool AppendedInstanced = false;
 	for (auto& QuadObj : this->QuadStack)
 	{
-		if (QuadObj.DiffuseMap->FilePath == QuadTexture.FilePath && QuadObj.ScreenSpace == ScreenSpace &&
-			QuadObj.TextureAtlas == Source && QuadObj.BrightnessThreshold == BrightnessThreshold &&
-			QuadObj.OpacityMultiplier == OpacityMultiplier)
+		if (QuadObj.DiffuseMap)
+		{
+			if (QuadObj.DiffuseMap->FilePath == QuadTexture.FilePath && QuadObj.ScreenSpace == ScreenSpace &&
+				QuadObj.TextureAtlas == Source && QuadObj.BrightnessThreshold == BrightnessThreshold &&
+				QuadObj.OpacityMultiplier == OpacityMultiplier)
+			{
+				QuadObj.ModelMatrices.emplace_back(Model);
+				AppendedInstanced = true;
+				break;
+			}
+		}
+	}
+
+	// It hasnt been appended to an quad instancing array therefore create a new quad render object
+	if (!AppendedInstanced)
+	{
+		std::vector<glm::mat4> ModelMatrices = { Model };
+		this->QuadStack.push_back({ &QuadTexture, Source, glm::vec4(0.0f), ModelMatrices, ScreenSpace, Emissive, 
+			BrightnessThreshold, OpacityMultiplier});
+	}
+}
+
+void GraphicsRenderer::RenderFillQuad(const Rect& Destination, const glm::vec4& QuadColor, double RotationAngle, 
+	bool ScreenSpace, bool Emissive) const
+{
+	// Construct the model matrix for the quad
+	glm::dmat4 Model;
+	Model = glm::translate(Model, glm::dvec3(Destination.x + (Destination.w / 2.0), Destination.y + (Destination.h / 2.0),
+		0.0));
+	Model = glm::scale(Model, glm::dvec3(Destination.w, Destination.h, 1.0));
+	Model = glm::rotate(Model, glm::radians(RotationAngle), glm::dvec3(0.0, 0.0, 1.0));
+
+	// Next check whether another quad in the stack is indentical with the new quad
+	bool AppendedInstanced = false;
+	for (auto& QuadObj : this->QuadStack)
+	{
+		if (QuadObj.DiffuseMap == nullptr && QuadObj.ScreenSpace == ScreenSpace && QuadObj.Color == QuadColor &&
+			QuadObj.TextureAtlas == Rect(0, 0, 0, 0) && QuadObj.BrightnessThreshold == 1.0f &&
+			QuadObj.OpacityMultiplier == 1.0f)
 		{
 			QuadObj.ModelMatrices.emplace_back(Model);
 			AppendedInstanced = true;
@@ -193,10 +248,10 @@ void GraphicsRenderer::RenderQuad(const Rect& Source, const Rect& Destination, c
 	if (!AppendedInstanced)
 	{
 		std::vector<glm::mat4> ModelMatrices = { Model };
-		this->QuadStack.push_back({ &QuadTexture, Source, ModelMatrices, ScreenSpace, Emissive, BrightnessThreshold,
-			OpacityMultiplier});
+		this->QuadStack.push_back({ nullptr, Rect(0, 0, 0, 0), QuadColor, ModelMatrices, ScreenSpace, Emissive, 1.0f, 1.0f });
 	}
 }
+
 
 void GraphicsRenderer::RefreshScreen(const FrameBufferPtr& RenderingFBO) const
 {
@@ -226,20 +281,23 @@ void GraphicsRenderer::FlushStack(const OrthoCamera& Camera, const FrameBufferPt
 			this->QuadShader->SetUniformEx<glm::mat4>("CameraMatrix", Camera.GetProjectionMatrix() * Camera.GetViewMatrix());
 
 		// Calculate UV coords based on texture atlas data
-		constexpr float TEXEL_OFFSET = 0.5f;
-		const glm::vec2 TEXTURE_SIZE = glm::vec2(static_cast<float>(QuadObj.DiffuseMap->TextureBuffer->GetWidth()),
-			static_cast<float>(QuadObj.DiffuseMap->TextureBuffer->GetHeight()));
-
-		const auto& ATLAS = QuadObj.TextureAtlas;
-		std::array<float, 8> UVCoords
+		if (QuadObj.DiffuseMap)
 		{
-			(ATLAS.x + TEXEL_OFFSET) / TEXTURE_SIZE.x, (ATLAS.y + TEXEL_OFFSET) / TEXTURE_SIZE.y,
-			(ATLAS.x + ATLAS.w - TEXEL_OFFSET) / TEXTURE_SIZE.x, (ATLAS.y + TEXEL_OFFSET) / TEXTURE_SIZE.y,
-			(ATLAS.x + TEXEL_OFFSET) / TEXTURE_SIZE.x, (ATLAS.y + ATLAS.h - TEXEL_OFFSET) / TEXTURE_SIZE.y,
-			(ATLAS.x + ATLAS.w - TEXEL_OFFSET) / TEXTURE_SIZE.x, (ATLAS.y + ATLAS.h - TEXEL_OFFSET) / TEXTURE_SIZE.y,
-		};
+			constexpr float TEXEL_OFFSET = 1.0f;
+			const glm::vec2 TEXTURE_SIZE = glm::vec2(static_cast<float>(QuadObj.DiffuseMap->TextureBuffer->GetWidth()),
+				static_cast<float>(QuadObj.DiffuseMap->TextureBuffer->GetHeight()));
 
-		this->QuadVbo->UpdateBufferData(UVCoords.data(), 8 * sizeof(float), 8 * sizeof(float));
+			const auto& ATLAS = QuadObj.TextureAtlas;
+			std::array<float, 8> UVCoords
+			{
+				((float)ATLAS.x + TEXEL_OFFSET) / TEXTURE_SIZE.x, ((float)ATLAS.y + TEXEL_OFFSET) / TEXTURE_SIZE.y,
+				((float)ATLAS.x + (float)ATLAS.w - TEXEL_OFFSET) / TEXTURE_SIZE.x, ((float)ATLAS.y + TEXEL_OFFSET) / TEXTURE_SIZE.y,
+				((float)ATLAS.x + TEXEL_OFFSET) / TEXTURE_SIZE.x, ((float)ATLAS.y + (float)ATLAS.h - TEXEL_OFFSET) / TEXTURE_SIZE.y,
+				((float)ATLAS.x + (float)ATLAS.w - TEXEL_OFFSET) / TEXTURE_SIZE.x, ((float)ATLAS.y + (float)ATLAS.h - TEXEL_OFFSET) / TEXTURE_SIZE.y,
+			};
+
+			this->QuadVbo->UpdateBufferData(UVCoords.data(), 8 * sizeof(float), 8 * sizeof(float));
+		}
 
 		// Generate the instancing matrix buffer for the models given by quad render data
 		auto InstancedArray = Buffer::GenerateVertexBuffer(&QuadObj.ModelMatrices[0],
@@ -252,14 +310,21 @@ void GraphicsRenderer::FlushStack(const OrthoCamera& Camera, const FrameBufferPt
 		this->QuadVao->AttachBuffers(InstancedArray);
 
 		// Now we finally draw the quad (or quads if multiple instances)
-		this->QuadShader->SetUniform<float>("Mat.BrightnessThreshold", QuadObj.BrightnessThreshold);
-		this->QuadShader->SetUniform<float>("Mat.OpacityMultiplier", QuadObj.OpacityMultiplier);
 		this->QuadShader->SetUniform<bool>("Mat.Emissive", QuadObj.Emissive);
-		this->QuadShader->SetUniform<int>("Mat.Texture", 0);
+		this->QuadShader->SetUniform<bool>("Mat.UseTextures", QuadObj.DiffuseMap);
 
-		QuadObj.DiffuseMap->TextureBuffer->BindTexture(0);
+		if (QuadObj.DiffuseMap)
+		{
+			this->QuadShader->SetUniform<float>("Mat.BrightnessThreshold", QuadObj.BrightnessThreshold);
+			this->QuadShader->SetUniform<float>("Mat.OpacityMultiplier", QuadObj.OpacityMultiplier);
+			this->QuadShader->SetUniform<int>("Mat.DiffuseMap", 0);
+
+			QuadObj.DiffuseMap->TextureBuffer->BindTexture(0);
+		}
+		else
+			this->QuadShader->SetUniformEx<glm::vec4>("Mat.DiffuseColor", QuadObj.Color);
+
 		this->QuadVao->BindVertexArray();
-
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(QuadObj.ModelMatrices.size()));
 	}
 

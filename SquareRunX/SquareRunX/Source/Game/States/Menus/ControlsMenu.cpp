@@ -8,9 +8,9 @@ void ControlsMenu::InitState()
 {
 	// Get the fonts needed
 	this->ArialRoundedFont = ResourceLoading::GetGameState()->GetFont("Arial-Rounded");
+	this->SansSerifShadedFont = ResourceLoading::GetGameState()->GetFont("Sans-Serif-Shaded");
 
 	// Get the textures needed
-	this->ControlsTitleTex = ResourceLoading::GetGameState()->GetTexture("Controls-Title");
 	this->TransitionTex1 = ResourceLoading::GetGameState()->GetTexture("Transition-1");
 	this->TransitionTex2 = ResourceLoading::GetGameState()->GetTexture("Transition-2");
 	this->KeybindsTex = ResourceLoading::GetGameState()->GetTexture("Keybinds-Img");
@@ -21,8 +21,8 @@ void ControlsMenu::InitState()
 		[=]() { this->EndOfState = true; this->StageOneComplete = false; this->PreStageComplete = false; });
 
 	// Initialize other stuff
-	this->TransitionDest1 = { 0, -1400, (int)this->SceneCamera.GetViewSize().x, 1400 };
-	this->TransitionDest2 = { (int)this->SceneCamera.GetViewSize().x + 600, 0, 600, (int)this->SceneCamera.GetViewSize().y };
+	this->TransitionDest1 = { 0.0, -1400.0, this->SceneCamera.GetViewSize().x, 1400.0 };
+	this->TransitionDest2 = { this->SceneCamera.GetViewSize().x + 600, 0.0, 600.0, this->SceneCamera.GetViewSize().y };
 }
 
 void ControlsMenu::DestroyState() 
@@ -33,7 +33,7 @@ void ControlsMenu::DestroyState()
 	this->EndOfState = false;
 }
 
-void ControlsMenu::UpdateTick(const float& DeltaTime)
+void ControlsMenu::UpdateTick(const double& DeltaTime)
 {
 	if (this->TransitionComplete && !this->EndOfState)
 	{
@@ -58,15 +58,12 @@ void ControlsMenu::RenderFrame() const
 	Rect SourceRect, DestinationRect;
 
 	// Render the controls menu title
-	SourceRect = { 0, 0, 572, 100 };
-	DestinationRect = { 40, 940, SourceRect.w, SourceRect.h };
-
-	GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, DestinationRect, *this->ControlsTitleTex, 0.0f, true, false,
-		1.0f, this->OpacityMultiplier);
+	GraphicsRenderer::GetSingleton().RenderText({ 40, 940 }, 100, "CONTROLS", *this->SansSerifShadedFont,
+		{ glm::vec3(0.0f), this->OpacityMultiplier });
 
 	// Render the keybinds texture
 	SourceRect = { 0, 0, 1300, 680 };
-	DestinationRect = { 20, 870 - SourceRect.h, SourceRect.w, SourceRect.h };
+	DestinationRect = { 20.0, 870 - SourceRect.h, SourceRect.w, SourceRect.h };
 
 	GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, DestinationRect, *this->KeybindsTex, 0.0f, true, false, 1.0f,
 		this->OpacityMultiplier);

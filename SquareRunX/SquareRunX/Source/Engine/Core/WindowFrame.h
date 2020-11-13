@@ -1,4 +1,6 @@
 #pragma once
+#include <chrono>
+
 struct GLFWwindow;
 typedef unsigned int uint32_t;
 
@@ -14,6 +16,8 @@ class WindowFrame
 private:
 	GLFWwindow* LibraryWindow;
 	uint32_t Width, Height;
+
+	std::chrono::steady_clock::time_point WindowStartTime;
 private:
 	WindowFrame();
 	~WindowFrame();
@@ -32,5 +36,5 @@ public:
 
 	const uint32_t& GetWidth() const;
 	const uint32_t& GetHeight() const;
-	float GetTick() const;
+	double GetTick() const; // Ticks measured in milliseconds
 };

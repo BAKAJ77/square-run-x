@@ -10,7 +10,7 @@
 
 PostProcessing::PostProcessing() :
 	Gamma(2.2f), Resolution(WindowFrame::GetSingleton().GetWidth(), WindowFrame::GetSingleton().GetHeight()),
-	NumSamplesMS(1), Opacity(1.0f), PostProcessShader(nullptr)
+	NumSamplesMS(1), Opacity(1.0), PostProcessShader(nullptr)
 {}
 
 PostProcessing::~PostProcessing() {}
@@ -58,7 +58,7 @@ void PostProcessing::InitProcess()
 	this->PostProcessFBO->AttachTexture2D(GL_COLOR_ATTACHMENT0, this->FBOColorAttachment);
 }
 
-void PostProcessing::SetOpacityLevel(float Alpha) { this->Opacity = std::clamp(Alpha, 0.0f, 1.0f); }
+void PostProcessing::SetOpacityLevel(double Alpha) { this->Opacity = std::clamp(Alpha, 0.0, 1.0); }
 
 void PostProcessing::RenderProcessedFrame() const
 {
@@ -76,7 +76,7 @@ void PostProcessing::RenderProcessedFrame() const
 	this->PostProcessShader->SetUniformEx<glm::vec2>("ResolutionSize", this->Resolution);
 	
 	this->PostProcessShader->SetUniform<int>("NumSamplesMS", this->NumSamplesMS);
-	this->PostProcessShader->SetUniform<float>("Opacity", this->Opacity);
+	this->PostProcessShader->SetUniform<double>("Opacity", this->Opacity);
 	this->PostProcessShader->SetUniform<float>("Gamma", this->Gamma);
 	
 	// Draw the quad
@@ -96,4 +96,4 @@ PostProcessing& PostProcessing::GetSingleton()
 
 glm::ivec2 PostProcessing::GetResolution() const { return this->Resolution; }
 
-const float& PostProcessing::GetOpacity() const { return this->Opacity; }
+const double& PostProcessing::GetOpacity() const { return this->Opacity; }

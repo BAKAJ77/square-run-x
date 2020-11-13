@@ -40,7 +40,7 @@ public:
 	virtual void PauseState() {}
 	virtual void ResumeState() {}
 
-	virtual void UpdateTick(const float& DeltaTime) = 0;
+	virtual void UpdateTick(const double& DeltaTime) = 0;
 	virtual void RenderFrame() const = 0;
 
 	void SwitchState(GameStateBase* State) { GameStateManager::GetSingleton().SwitchState(State); }

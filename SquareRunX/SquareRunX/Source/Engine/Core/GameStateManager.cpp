@@ -6,29 +6,17 @@
 
 namespace Transition
 {
-	void PlayTransitionScreen(TransitionType Type)
+	void PlayTransitionScreen(TransitionType Type, const double& DeltaTime)
 	{
-		static float PrevTime = 0.0f;
-
 		if (Type == TransitionType::REVEAL)
 		{
-			if (WindowFrame::GetSingleton().GetTick() - PrevTime > Transition::TIME_STEP)
-			{
-				PostProcessing::GetSingleton().SetOpacityLevel(PostProcessing::GetSingleton().GetOpacity() +
-					Transition::OPACITY_CHANGE_RATE);
-
-				PrevTime = WindowFrame::GetSingleton().GetTick();
-			}
+			PostProcessing::GetSingleton().SetOpacityLevel(PostProcessing::GetSingleton().GetOpacity() +
+				(Transition::OPACITY_CHANGE_RATE * DeltaTime));
 		}
 		else if (Type == TransitionType::HIDE)
 		{
-			if (WindowFrame::GetSingleton().GetTick() - PrevTime > Transition::TIME_STEP)
-			{
-				PostProcessing::GetSingleton().SetOpacityLevel(PostProcessing::GetSingleton().GetOpacity() -
-					Transition::OPACITY_CHANGE_RATE);
-
-				PrevTime = WindowFrame::GetSingleton().GetTick();
-			}
+			PostProcessing::GetSingleton().SetOpacityLevel(PostProcessing::GetSingleton().GetOpacity() -
+				(Transition::OPACITY_CHANGE_RATE * DeltaTime));
 		}
 	}
 }
@@ -50,7 +38,10 @@ void GameStateManager::DestroyManager()
 void GameStateManager::SwitchState(GameStateBase* State)
 {
 	if (!this->StateStack.empty())
+	{
 		this->EndedState = false;
+		this->FirstStateAdded = false;
+	}
 
 	if(this->SwitchedState != State)
 		this->SwitchedState = State;
@@ -79,9 +70,9 @@ void GameStateManager::PopState()
 		this->StateStack.back()->ResumeState();
 }
 
-void GameStateManager::HandleStateTransitioning()
+void GameStateManager::HandleStateTransitioning(const double& DeltaTime)
 {
-	// Handle transitionint between states (Note that this only occurs when SwitchState() is called)
+	// Handle transitioning between states (Note that this only occurs when SwitchState() is called)
 	if (!this->StartedState && this->EndedState)
 	{
 		if (PostProcessing::GetSingleton().GetOpacity() == 1.0f && !this->FirstStateAdded)
@@ -100,7 +91,7 @@ void GameStateManager::HandleStateTransitioning()
 				this->SwitchedState = nullptr;
 			}
 
-			Transition::PlayTransitionScreen(TransitionType::REVEAL);
+			Transition::PlayTransitionScreen(TransitionType::REVEAL, DeltaTime);
 		}
 	}
 	else if (!this->EndedState)
@@ -115,13 +106,13 @@ void GameStateManager::HandleStateTransitioning()
 			this->EndedState = true;
 		}
 		else
-			Transition::PlayTransitionScreen(TransitionType::HIDE);
+			Transition::PlayTransitionScreen(TransitionType::HIDE, DeltaTime);
 	}
 }
 
-void GameStateManager::UpdateState(const float& DeltaTime)
+void GameStateManager::UpdateState(const double& DeltaTime)
 {
-	this->HandleStateTransitioning();
+	this->HandleStateTransitioning(DeltaTime);
 
 	// Update states in the stack
 	uint32_t UpdateCount = 0;
@@ -139,7 +130,7 @@ void GameStateManager::UpdateState(const float& DeltaTime)
 	}
 }
 
-void GameStateManager::RenderStates() const
+void GameStateManager::RenderStates(const PerformanceCounter* PerfCounter) const
 {
 	uint32_t RenderCount = 0;
 	bool ClearedScreen = false;
@@ -147,7 +138,11 @@ void GameStateManager::RenderStates() const
 	for (const auto& State : this->StateStack)
 	{
 		if (RenderCount == this->StateStack.size() - 1)
+		{
 			State->RenderFrame();
+			if(PerfCounter)
+				PerfCounter->RenderCounter();
+		}
 		else
 		{
 			if (State->RenderAfterPause)
@@ -176,6 +171,11 @@ GameStateManager& GameStateManager::GetSingleton()
 bool GameStateManager::IsStateStackEmpty() const
 {
 	return this->StateStack.empty() && !this->SwitchedState;
+}
+
+bool GameStateManager::HasCurrentStateStarted() const
+{
+	return this->StartedState;
 }
 
 const OrthoCamera* GameStateManager::GetCurrentStateCamera() const

@@ -17,35 +17,51 @@ void ResourceLoading::LoadGameFonts()
     // Load the fonts required by the game
     this->GameFonts[0] = { "Arial-Rounded",
         FontLoaderTTF::GetSingleton().LoadFont("ARIAL_ROUNDED", "GameFiles/Fonts/ARLRDBD.TTF") };
+    this->GameFonts[1] = { "Sans-Serif-Shaded",
+        FontLoaderTTF::GetSingleton().LoadFont("SANS_SERIF_SHADED", "GameFiles/Fonts/SANSSERIFSH.TTF") };
+    this->GameFonts[2] = { "Discovery",
+        FontLoaderTTF::GetSingleton().LoadFont("DISCOVERY", "GameFiles/Fonts/DISCOVERY.TTF") };
 }
 
 void ResourceLoading::LoadGameTextures()
 {
     // Load the textures required by the game
-    this->GameTextures[0] = { "Background-1",
-        TextureManager::GetSingleton().LoadTexture("BKG_1", "GameFiles/Textures/BKG_1.png") };
-    this->GameTextures[1] = { "Loading-Wheel",
+    this->GameTextures[0] = { "Loading-Wheel",
         TextureManager::GetSingleton().LoadTexture("LOADING_WHEEL", "GameFiles/Textures/LOADING_WHEEL.png") };
-    this->GameTextures[2] = { "Tile-Sheet",
+    this->GameTextures[1] = { "Tile-Sheet",
         TextureManager::GetSingleton().LoadTexture("TILE_SHEET", "GameFiles/Textures/TILE_SHEET.png") };
-    this->GameTextures[3] = { "Menu-Title",
-        TextureManager::GetSingleton().LoadTexture("MENU_TITLE", "GameFiles/Textures/MENU_TITLE.png") };
-    this->GameTextures[4] = { "Controls-Title",
-        TextureManager::GetSingleton().LoadTexture("CONTROLS_TITLE", "GameFiles/Textures/CONTROLS_TITLE.png") };
-    this->GameTextures[5] = { "Button-Img",
+    this->GameTextures[2] = { "Button-Img",
         TextureManager::GetSingleton().LoadTexture("BUTTON_BKG", "GameFiles/Textures/BUTTON_BKG.png") };
-    this->GameTextures[6] = { "Keybinds-Img",
+    this->GameTextures[3] = { "Keybinds-Img",
         TextureManager::GetSingleton().LoadTexture("KEYBINDS_IMG", "GameFiles/Textures/KEYBIND_DISPLAY.png") };
-    this->GameTextures[7] = { "Transition-1",
+    this->GameTextures[4] = { "Transition-1",
         TextureManager::GetSingleton().LoadTexture("TRANSITION_1", "GameFiles/Textures/TRANSITION_1.png") };
-    this->GameTextures[8] = { "Transition-2",
+    this->GameTextures[5] = { "Transition-2",
         TextureManager::GetSingleton().LoadTexture("TRANSITION_2", "GameFiles/Textures/TRANSITION_2.png") };
-    this->GameTextures[9] = { "Leaderboard-Title",
-        TextureManager::GetSingleton().LoadTexture("LEADERBOARD_TITLE", "GameFiles/Textures/LEADERBOARD_TITLE.png") };
-    this->GameTextures[10] = { "Leaderboard-Skin",
+    this->GameTextures[6] = { "Leaderboard-Skin",
         TextureManager::GetSingleton().LoadTexture("LEADERBOARD_BKG", "GameFiles/Textures/LEADERBOARD_BKG.png") };
-    this->GameTextures[11] = { "Button-Box",
+    this->GameTextures[7] = { "Button-Box",
         TextureManager::GetSingleton().LoadTexture("BUTTON_BOX", "GameFiles/Textures/BUTTON_BOX.png") };
+    this->GameTextures[8] = { "Text-Box",
+        TextureManager::GetSingleton().LoadTexture("TEXT_BOX", "GameFiles/Textures/TEXT_BOX.png") };
+    this->GameTextures[9] = { "Transition-3",
+        TextureManager::GetSingleton().LoadTexture("TRANSITION_3", "GameFiles/Textures/TRANSITION_3.png") };
+    this->GameTextures[10] = { "Player-Spritesheet",
+        TextureManager::GetSingleton().LoadTexture("PLAYER_SPRITESHEET", "GameFiles/Textures/PLAYER_SPRITESHEET.png") };
+
+    // Load parallax background textures
+    this->GameTextures[11] = { "Forest-Clouds",
+       TextureManager::GetSingleton().LoadTexture("FOREST_PX_3", "GameFiles/Textures/Forest/3.png") };
+    this->GameTextures[12] = { "Forest-Close",
+       TextureManager::GetSingleton().LoadTexture("FOREST_PX_6", "GameFiles/Textures/Forest/6.png") };
+    this->GameTextures[13] = { "Forest-Middle",
+       TextureManager::GetSingleton().LoadTexture("FOREST_PX_5", "GameFiles/Textures/Forest/5.png") };
+    this->GameTextures[14] = { "Forest-Far",
+       TextureManager::GetSingleton().LoadTexture("FOREST_PX_4", "GameFiles/Textures/Forest/4.png") };
+    this->GameTextures[15] = { "Forest-Mountains",
+       TextureManager::GetSingleton().LoadTexture("FOREST_PX_2", "GameFiles/Textures/Forest/2.png") };
+    this->GameTextures[16] = { "Forest-Sky",
+       TextureManager::GetSingleton().LoadTexture("FOREST_PX_1", "GameFiles/Textures/Forest/1.png") };
 }
 
 void ResourceLoading::LoadGameAudio()
@@ -58,6 +74,17 @@ void ResourceLoading::LoadGameLevelMaps()
     std::this_thread::sleep_for(2s); // Pause the loading thread for a bit
 
     // Load the playable levels required by the game
+    FileHandler::GetSingleton().OpenFile("LEVEL_DATABASE", "GameFiles/Data/LevelDatabase.dat");
+
+    for (int i = 0; i < FileHandler::GetSingleton().GetNumLinesInFile("LEVEL_DATABASE"); i++)
+    { 
+        const std::string LOADED_LEVEL_PATH = FileHandler::GetSingleton().ReadData("LEVEL_DATABASE", i + 1).str();
+        LevelMap LoadedLevel = LevelMap(LOADED_LEVEL_PATH);
+
+        this->GameLevels.emplace_back(LoadedLevel);
+    }
+
+    FileHandler::GetSingleton().CloseFile("LEVEL_DATABASE");
 
     // Lock access to variable from other threads temporarily
     Threading::Mutex.lock();
@@ -78,12 +105,12 @@ void ResourceLoading::InitState()
 
 void ResourceLoading::DestroyState() {}
 
-void ResourceLoading::UpdateTick(const float& DeltaTime)
+void ResourceLoading::UpdateTick(const double& DeltaTime)
 {
     if(this->FinishedLoading)
         this->SwitchState(MainMenu::GetGameState());
 
-    this->LoadingWheelRotation += 425.0f * DeltaTime; // Update rotation position of the loading wheel
+    this->LoadingWheelRotation += 0.425 * DeltaTime; // Update rotation position of the loading wheel
 }
 
 void ResourceLoading::RenderFrame() const
@@ -124,6 +151,17 @@ const Texture* ResourceLoading::GetTexture(const std::string& TextureName) const
     {
         if (Obj.TextureName == TextureName)
             return Obj.Data;
+    }
+
+    return nullptr;
+}
+
+LevelMap* ResourceLoading::GetLevelMap(int LevelIndex, int ActIndex) const
+{
+    for (auto& Obj : this->GameLevels)
+    {
+        if (Obj.GetLevelIndex() == LevelIndex && Obj.GetActIndex() == ActIndex)
+            return &Obj;
     }
 
     return nullptr;
