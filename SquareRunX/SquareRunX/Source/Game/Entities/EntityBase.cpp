@@ -42,7 +42,7 @@ void EntityBase::HandleSafeCollisions(const LevelMap* Map, const double& DeltaTi
 	for (const auto& Collider : Map->GetSafeColliders())
 	{
 		const ColliderSide SIDE_COLLIDED = this->BoundingBox.IsColliding(Collider);
-		
+
 		if (SIDE_COLLIDED == ColliderSide::TOP)
 		{
 			this->Position.y = Collider.GetBottomSide() - this->BoundingBox.h;

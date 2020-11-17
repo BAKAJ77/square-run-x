@@ -6,10 +6,10 @@ class PlayerEntity : public EntityBase
 {
 private:
 	OrthoCamera* SceneCamera;
-	double JumpHeight;
 
 	glm::dvec2 SpawnPointPosition;
 	int LivesCounter, CurrentHealth, MaxHealth;
+	double JumpHeight;
 private:
 	// Movement functions
 	void ExecuteJump();

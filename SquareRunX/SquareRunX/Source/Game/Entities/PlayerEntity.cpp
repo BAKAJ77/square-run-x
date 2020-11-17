@@ -10,12 +10,12 @@ namespace
 }
 
 PlayerEntity::PlayerEntity() :
-	JumpHeight(3.0f), SceneCamera(nullptr), LivesCounter(3), CurrentHealth(100), MaxHealth(100)
+	JumpHeight(3.0f), LivesCounter(3), CurrentHealth(100), MaxHealth(100), SceneCamera(nullptr)
 {}
 
 PlayerEntity::PlayerEntity(OrthoCamera& SceneCamera, const glm::dvec2& Pos, const glm::dvec2& Scale, double MaxSpeed, 
 	double Acceleration, double JumpHeight, double Weight) :
-	JumpHeight(JumpHeight), SceneCamera(&SceneCamera), SpawnPointPosition(Pos)
+	JumpHeight(JumpHeight), SpawnPointPosition(Pos), SceneCamera(&SceneCamera)
 {
 	// Setup the animation of the player entity
 	this->AnimSprite = AnimatedSprite(ResourceLoading::GetGameState()->GetTexture("Player-Spritesheet"));

@@ -2,6 +2,7 @@
 #include "Engine/Core/AnimationSprite.h"
 #include "Game/Utils/PhysicsHandling.h"
 #include "Game/Utils/LevelLoader.h"
+
 #include <glm/glm.hpp>
 
 class EntityBase
