@@ -9,7 +9,6 @@
 namespace Input
 {
 	// Input related variables
-	std::unordered_map<InputCode, KeyState>* KeyStatesPtr;
 	glm::vec2 CursorPosition; 
 
 	// Callback functions
@@ -19,39 +18,6 @@ namespace Input
 		CursorPosition.x = (1920.0f / static_cast<float>(WindowFrame::GetSingleton().GetWidth())) * static_cast<float>(PosX);
 		CursorPosition.y = (1080.0f / static_cast<float>(WindowFrame::GetSingleton().GetHeight())) *
 			(static_cast<float>(WindowFrame::GetSingleton().GetHeight()) - static_cast<float>(PosY));
-	}
-
-	void KeyStateCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods)
-	{
-		const auto& KeyObj = KeyStatesPtr->find((InputCode)Key);
-
-		switch (Action)
-		{
-		case GLFW_PRESS:
-		{
-			if (KeyObj == KeyStatesPtr->end())
-				KeyStatesPtr->insert(std::pair<InputCode, KeyState>(static_cast<InputCode>(Key), KeyState::PRESSED));
-			else
-				KeyStatesPtr->at((InputCode)Key) = KeyState::PRESSED;
-		}
-			break;
-		case GLFW_REPEAT:
-		{
-			if (KeyObj == KeyStatesPtr->end())
-				KeyStatesPtr->insert(std::pair<InputCode, KeyState>(static_cast<InputCode>(Key), KeyState::REPEAT));
-			else
-				KeyStatesPtr->at((InputCode)Key) = KeyState::REPEAT;
-		}
-			break;
-		case GLFW_RELEASE:
-		{
-			if (KeyObj == KeyStatesPtr->end())
-				KeyStatesPtr->insert(std::pair<InputCode, KeyState>(static_cast<InputCode>(Key), KeyState::RELEASED));
-			else
-				KeyStatesPtr->at((InputCode)Key) = KeyState::RELEASED;
-		}
-			break;
-		}
 	}
 }
 
@@ -63,30 +29,7 @@ InputHandler::~InputHandler() {}
 
 void InputHandler::InitHandler()
 {
-	Input::KeyStatesPtr = &this->KeyStates;
-
-	glfwSetKeyCallback(WindowFrame::GetSingleton().GetLibraryWindow(), Input::KeyStateCallback);
 	glfwSetCursorPosCallback(WindowFrame::GetSingleton().GetLibraryWindow(), Input::CursorPositionCallback);
-}
-
-bool InputHandler::WasKeyPressed(InputCode Key) const
-{
-	const auto& KeyObj = this->KeyStates.find(Key);
-	
-	if (KeyObj != this->KeyStates.end())
-		return KeyObj->second == KeyState::PRESSED;
-	else
-		return false;
-}
-
-bool InputHandler::WasKeyReleased(InputCode Key) const
-{
-	const auto& KeyObj = this->KeyStates.find(Key);
-
-	if (KeyObj != this->KeyStates.end())
-		return KeyObj->second == KeyState::RELEASED;
-	else
-		return false;
 }
 
 bool InputHandler::IsKeyHeld(InputCode Key) const

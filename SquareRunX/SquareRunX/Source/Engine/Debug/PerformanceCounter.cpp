@@ -21,37 +21,31 @@ void PerformanceCounter::SwitchEnabledState()
 
 void PerformanceCounter::IncrementRenderCounter()
 {
-	if (this->Enabled)
+	this->FramesRendered++;
+
+	// Record the number of frames rendered each second
+	static double PreviousTime = WindowFrame::GetSingleton().GetTick();
+	if (WindowFrame::GetSingleton().GetTick() - PreviousTime >= 1000.0)
 	{
-		this->FramesRendered++;
+		this->RecordedFPSCount = this->FramesRendered;
+		this->FramesRendered = 0;
 
-		// Record the number of frames rendered each second
-		static double PreviousTime = WindowFrame::GetSingleton().GetTick();
-		if (WindowFrame::GetSingleton().GetTick() - PreviousTime >= 1000.0)
-		{
-			this->RecordedFPSCount = this->FramesRendered;
-			this->FramesRendered = 0;
-
-			PreviousTime = WindowFrame::GetSingleton().GetTick();
-		}
+		PreviousTime = WindowFrame::GetSingleton().GetTick();
 	}
 }
 
 void PerformanceCounter::IncrementUpdateCounter()
 {
-	if (this->Enabled)
+	this->UpdateTicks++;
+
+	// Record the number of frames rendered each second
+	static double PreviousTime = WindowFrame::GetSingleton().GetTick();
+	if (WindowFrame::GetSingleton().GetTick() - PreviousTime >= 1000.0)
 	{
-		this->UpdateTicks++;
+		this->RecordedUpdateTicks = this->UpdateTicks;
+		this->UpdateTicks = 0;
 
-		// Record the number of frames rendered each second
-		static double PreviousTime = WindowFrame::GetSingleton().GetTick();
-		if (WindowFrame::GetSingleton().GetTick() - PreviousTime >= 1000.0)
-		{
-			this->RecordedUpdateTicks = this->UpdateTicks;
-			this->UpdateTicks = 0;
-
-			PreviousTime = WindowFrame::GetSingleton().GetTick();
-		}
+		PreviousTime = WindowFrame::GetSingleton().GetTick();
 	}
 }
 
@@ -68,6 +62,6 @@ void PerformanceCounter::RenderCounter() const
 			static_cast<int>(GraphicsRenderer::GetSingleton().GetTextSize(RECORDED_STR, *this->ConsolasBoldFont, FONT_SIZE).x);
 
 		GraphicsRenderer::GetSingleton().RenderText({ (1920 - TEXT_WIDTH) - TEXT_OFFSET, 1020 }, FONT_SIZE, RECORDED_STR,
-			*this->ConsolasBoldFont, { 1.0f, 0.0f, 0.0f, 1.0f }, true);
+			*this->ConsolasBoldFont, { 0.0f, 1.0f, 0.0f, 1.0f }, true);
 	}
 }

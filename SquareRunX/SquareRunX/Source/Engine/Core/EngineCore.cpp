@@ -26,8 +26,7 @@ namespace
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-EngineCore::EngineCore() :
-	DisplayPerformanceCounter(false)
+EngineCore::EngineCore()
 {
 	this->InitSingletons();
 	this->MainLoop();
@@ -55,17 +54,7 @@ void EngineCore::InitSingletons()
 	PostProcessing::GetSingleton().InitProcess();
 	InputHandler::GetSingleton().InitHandler();
 
-	this->LoadConfigSettings();
 	GameStateManager::GetSingleton().SwitchState(ResourceLoading::GetGameState());
-}
-
-void EngineCore::LoadConfigSettings()
-{
-	// Load the neccesary config setting values
-	CFGConfigLoader::GetSingleton().OpenFile("Debugging");
-	this->DisplayPerformanceCounter = 
-		CFGElement::ToDataValue<bool>(*CFGConfigLoader::GetSingleton().QueryElement("DisplayPerfCounter"));
-	CFGConfigLoader::GetSingleton().CloseFile();
 }
 
 void EngineCore::MainLoop()
@@ -97,6 +86,20 @@ void EngineCore::MainLoop()
 
 void EngineCore::UpdateTick(const double& DeltaTime) 
 {
+	// If keys 'RIGHT SHIFT' and 'C' is pressed, then disable/enable FPS counter
+	static double ElapsedTime = 0.0;
+	if (ElapsedTime >= 500.0)
+	{
+		if (InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_RIGHT_SHIFT) &&
+			InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_C))
+		{
+			this->PerfCounter.SwitchEnabledState();
+			ElapsedTime = 0.0;
+		}
+	}
+
+	ElapsedTime += DeltaTime;
+
 	// Update in-use game states and FPS counter
 	GameStateManager::GetSingleton().UpdateState(DeltaTime);
 	this->PerfCounter.IncrementUpdateCounter();
@@ -105,10 +108,7 @@ void EngineCore::UpdateTick(const double& DeltaTime)
 void EngineCore::RenderTick() const 
 {
 	// Render the state scenes to the post-processing FBO
-	if(this->DisplayPerformanceCounter)
-		GameStateManager::GetSingleton().RenderStates(&this->PerfCounter);
-	else
-		GameStateManager::GetSingleton().RenderStates(nullptr);
+	GameStateManager::GetSingleton().RenderStates(&this->PerfCounter);
 	
 	// Render the processed scene texture to the screen
 	PostProcessing::GetSingleton().RenderProcessedFrame();

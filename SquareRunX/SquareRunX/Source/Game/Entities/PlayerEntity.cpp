@@ -116,7 +116,7 @@ void PlayerEntity::HandleEvents(const double& DeltaTime)
 		this->StopMovement(DeltaTime);
 
 	// Input for vertical movement
-	if (InputHandler::GetSingleton().WasKeyPressed(InputCode::KEY_SPACE) && this->IsOnGround)
+	if (InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_SPACE) && this->IsOnGround)
 		this->ExecuteJump();
 }
 

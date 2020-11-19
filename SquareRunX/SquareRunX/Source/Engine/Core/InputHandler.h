@@ -156,15 +156,11 @@ class InputHandler
 {
 	friend class EngineCore;
 private:
-	std::unordered_map<InputCode, KeyState> KeyStates;
-private:
 	InputHandler();
 	~InputHandler();
 
 	void InitHandler();
 public:
-	bool WasKeyPressed(InputCode Key) const;
-	bool WasKeyReleased(InputCode Key) const;
 	bool IsKeyHeld(InputCode Key) const;
 
 	bool WasMouseButtonClicked(InputCode Button) const;

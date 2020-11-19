@@ -118,7 +118,7 @@ NewGameMenu* NewGameMenu::GetGameState()
 void NewGameMenu::PopLastCharacter(const double& DeltaTime) const
 {
 	static double ElapsedTime = 0.0;
-	if (ElapsedTime >= 100.0)
+	if (ElapsedTime >= 125.0)
 	{
 		if (InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_BACKSPACE) && !TextBoxHandling::EnteredString.empty())
 		{

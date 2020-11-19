@@ -5,10 +5,8 @@ class EngineCore
 {
 private:
 	mutable PerformanceCounter PerfCounter;
-	bool DisplayPerformanceCounter;
 private:
 	void InitSingletons();
-	void LoadConfigSettings();
 
 	void MainLoop();
 	void UpdateTick(const double& DeltaTime);
