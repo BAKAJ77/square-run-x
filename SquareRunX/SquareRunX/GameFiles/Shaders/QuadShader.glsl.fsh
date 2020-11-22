@@ -28,5 +28,8 @@ void main()
     else
         FinalColor = Mat.DiffuseColor;
 
+    if(FinalColor.a == 0.0f)
+        discard;
+
     FragColor = FinalColor;
 }
