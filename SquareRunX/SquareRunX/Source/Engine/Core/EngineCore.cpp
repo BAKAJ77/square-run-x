@@ -2,16 +2,17 @@
 
 // Singleton Class Includes
 #include "Engine/Core/WindowFrame.h"
-#include "Engine/Filesystem/FileHandler.h"
 #include "Engine/Core/InputHandler.h"
+#include "Engine/Core/GameStateManager.h"
+#include "Engine/Core/AudioPlayer.h"
 #include "Engine/Graphics/GraphicsRenderer.h"
 #include "Engine/Graphics/ShaderManager.h"
 #include "Engine/Graphics/TextureManager.h"
 #include "Engine/Graphics/FontLoaderTTF.h"
 #include "Engine/Graphics/PostProcessingState.h"
-#include "Engine/Core/GameStateManager.h"
 #include "Engine/Debug/LoggingManager.h"
 #include "Engine/Filesystem/CFGConfigLoader.h"
+#include "Engine/Filesystem/FileHandler.h"
 
 // Other Includes
 #include "Game/States/Other/ResourceLoading.h"
@@ -39,6 +40,7 @@ EngineCore::~EngineCore()
 	ShaderManager::GetSingleton().DestroyManager();
 	TextureManager::GetSingleton().DestroyManager();
 	WindowFrame::GetSingleton().DestroyFrame();
+	AudioPlayer::GetSingleton().DestroyAudioEngine();
 	FileHandler::GetSingleton().DestroyHandler(); // Should be destroyed last since lots of classes rely on it
 }
 
@@ -53,6 +55,7 @@ void EngineCore::InitSingletons()
 	FontLoaderTTF::GetSingleton().InitLoader();
 	PostProcessing::GetSingleton().InitProcess();
 	InputHandler::GetSingleton().InitHandler();
+	AudioPlayer::GetSingleton().InitAudioEngine();
 
 	GameStateManager::GetSingleton().SwitchState(ResourceLoading::GetGameState());
 }

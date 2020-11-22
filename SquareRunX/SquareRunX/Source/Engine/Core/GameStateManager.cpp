@@ -21,6 +21,17 @@ namespace Transition
 	}
 }
 
+namespace Effects
+{
+	void PlayFadeEffect(TransitionType Type, double& ValueRef, const double& ChangeRate, const double& DeltaTime)
+	{
+		if (Type == TransitionType::REVEAL)
+			ValueRef = std::min(ValueRef + (ChangeRate * DeltaTime), 1.0);
+		else if (Type == TransitionType::HIDE)
+			ValueRef = std::max(ValueRef - (ChangeRate * DeltaTime), 0.0);
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 GameStateManager::GameStateManager() :

@@ -23,10 +23,13 @@ void GameplayState::InitState()
 	this->CurrentLevel = ResourceLoading::GetGameState()->GetLevelMap(this->CurrentGameSave.Level, this->CurrentGameSave.Act);
 	this->PlayerController = PlayerEntity(this->SceneCamera, 
 		this->CurrentLevel->GetPlayerCheckpoints()[this->CurrentGameSave.CheckpointIndex], { 64, 64 }, 1.0, 0.0075, 1.75);
-	
+
 	this->PlayerController.SetLivesCounter(this->CurrentGameSave.NumLives);
 	this->PlayerController.SetCurrentHealth(this->CurrentGameSave.CurrentHealth);
 	this->PlayerController.SetMaximumHealth(this->CurrentGameSave.MaxHealth);
+
+	this->ThemeAudio = AudioPlayer::GetSingleton().PlayAudio(this->CurrentLevel->GetThemeAudioPath().c_str(), true, true, 
+		true);
 }
 
 void GameplayState::DestroyState()
@@ -60,7 +63,7 @@ void GameplayState::UpdateTick(const double& DeltaTime)
 	// Check if player's health is empty, if so then stop gameplay and respawn player at last checkpoint
 	if (this->PlayerController.IsHealthEmpty() && this->IntroComplete)
 	{
-		this->HandleIntroTransition(DeltaTime, true, 3000.0, true);
+		this->HandleIntroTransition(DeltaTime, true, 2000.0, true);
 		if(!this->PlayerController.IsDestroyed())
 			this->PlayerController.DestroyEntity();
 	}
@@ -127,8 +130,13 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 
 			if (ShouldFade)
 			{
-				if (PostProcessing::GetSingleton().GetOpacity() > 0.0 && !CompletedFadeAway)
+				if (PostProcessing::GetSingleton().GetOpacity() > 0.0 && this->AudioVolume > 0.0 && !CompletedFadeAway)
+				{
 					Transition::PlayTransitionScreen(TransitionType::HIDE, DeltaTime);
+					Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.001, DeltaTime);
+
+					this->ThemeAudio->setVolume((float)this->AudioVolume);
+				}
 				else
 				{
 					static double ElapsedFadeTime = 0.0;
@@ -137,6 +145,12 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 						Transition::PlayTransitionScreen(TransitionType::REVEAL, DeltaTime);
 						if (PostProcessing::GetSingleton().GetOpacity() >= 1.0)
 						{
+							this->AudioVolume = 1.0;
+
+							this->ThemeAudio->setVolume((float)this->AudioVolume);
+							this->ThemeAudio->setIsPaused();
+							this->ThemeAudio->setPlayPosition(0);
+
 							ShouldFade = false;
 							ElapsedFadeTime = 0.0;
 						}
@@ -197,6 +211,8 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 					this->IntroTransitionDest1.y += (int)(TRANSITION_SPEED * DeltaTime);
 					if (this->IntroTransitionDest1.y + 100 >= 0)
 					{
+						this->ThemeAudio->setIsPaused(false);
+
 						this->IntroTransitionDest1.y = -100;
 						PreStageComplete = true;
 					}
@@ -228,7 +244,7 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 						static double ElapsedTime = 0.0;
 						ElapsedTime += DeltaTime;
 
-						if (ElapsedTime >= 3000.0)
+						if (ElapsedTime >= 2000.0)
 						{
 							FinishedDisplay = true;
 							StageOneComplete = false;

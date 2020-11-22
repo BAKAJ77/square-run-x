@@ -2,19 +2,22 @@
 #include "Engine/Core/InputHandler.h"
 #include "Engine/Core/WindowFrame.h"
 
+#include "Engine/Core/AudioPlayer.h"
+
 namespace 
 {
 	constexpr float BUTTON_CLICK_COOLDOWN = 500.0;
 }
 
 Button::Button() :
-	ButtonBKGTex(nullptr), ButtonTextFont(nullptr), BrightnessThreshold(1.0f), FontSize(48)
+	ButtonBKGTex(nullptr), ButtonTextFont(nullptr), BrightnessThreshold(1.0f), FontSize(48), CursorEntered(false)
 {}
 
 Button::Button(const Rect& TextureAtlas, const Rect& Destination, const Texture& BKGTexture, const Font& TextFont, 
 	const std::string& Text, const std::function<void()>& Function, uint32_t FontSize, const glm::vec3& TextColor) :
 	TextureAtlas(TextureAtlas), ButtonBKGTex(&BKGTexture), ButtonTextFont(&TextFont), ExecutableFunction(Function),
-	ButtonText(Text), BrightnessThreshold(1.0f), Destination(Destination), FontSize(FontSize), TextColor(TextColor)
+	ButtonText(Text), BrightnessThreshold(1.0f), Destination(Destination), FontSize(FontSize), TextColor(TextColor),
+	CursorEntered(false)
 {}
 
 Button::~Button() {}
@@ -36,10 +39,22 @@ void Button::UpdateButton()
 			PrevTime = WindowFrame::GetSingleton().GetTick();
 		}
 
+		if (!this->CursorEntered)
+		{
+			AudioPlayer::GetSingleton().SetAudioVolume(0.4f);
+			AudioPlayer::GetSingleton().PlayAudio("GameFiles/Audio/SOLID.wav");
+			AudioPlayer::GetSingleton().SetAudioVolume(1.0f);
+
+			this->CursorEntered = true;
+		}
+
 		this->BrightnessThreshold = 1.5f;
 	}
 	else
+	{
 		this->BrightnessThreshold = 1.0f;
+		this->CursorEntered = false;
+	}
 }
 
 void Button::RenderButton(float Opacity, int TextOffset) const

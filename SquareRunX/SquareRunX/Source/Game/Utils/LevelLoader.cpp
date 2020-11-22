@@ -6,8 +6,8 @@
 
 #include <algorithm>
 
-LevelMap::LevelMap(const std::string& FilePath) :
-    LevelIndex(0), ActIndex(0), Width(0), Height(0)
+LevelMap::LevelMap(const std::string& FilePath, const std::string& ThemeAudioPath) :
+    LevelIndex(0), ActIndex(0), Width(0), Height(0), ThemeAudioPath(ThemeAudioPath)
 {
     // Load the entire contents of the level file into string
     FileHandler::GetSingleton().OpenFile("LEVEL_FILE", FilePath.c_str(), FileFlags::READ_MODE);
@@ -316,4 +316,5 @@ const std::vector<glm::dvec2>& LevelMap::GetPlayerCheckpoints() const { return t
 const std::vector<ColliderBox>& LevelMap::GetSafeColliders() const { return this->SafeColliders; }
 const std::vector<ColliderBox>& LevelMap::GetDamagingColliders() const { return this->DamagingColliders; }
 
+const std::string& LevelMap::GetThemeAudioPath() const { return this->ThemeAudioPath; }
 ParallaxBKG& LevelMap::GetBackground() { return this->MapBackground; }

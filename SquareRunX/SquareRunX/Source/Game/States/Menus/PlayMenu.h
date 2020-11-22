@@ -14,6 +14,9 @@ private:
 	Rect TransitionDest1, TransitionDest2;
 	float OpacityMultiplier = 0.0f;
 	bool TransitionComplete = false, PausedState = false;
+
+	PlayableAudio ThemeAudio;
+	double AudioVolume = 1.0;
 public:
 	bool PreStageComplete = false, StageOneComplete = false, EndOfState = false; // Needed by 'back' button execute function
 public:

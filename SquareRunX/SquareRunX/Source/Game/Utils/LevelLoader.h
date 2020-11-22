@@ -1,6 +1,7 @@
 #pragma once
 #include "TileObject.h"
 
+#include "Engine/Core/AudioPlayer.h"
 #include "Engine/Graphics/OrthogonalCamera.h"
 #include "Engine/External/rapidxml/rapidxml.hpp"
 #include "Game/Utils/PhysicsHandling.h"
@@ -36,7 +37,7 @@ class LevelMap
 {
 private:
 	// The loaded level metadata
-	std::string Name;
+	std::string Name, ThemeAudioPath;
 	uint32_t Width, Height;
 	int LevelIndex, ActIndex;
 
@@ -57,7 +58,7 @@ private:
 	void LoadSpawnPoints(const rapidxml::xml_node<>* RootNode);
 	void LoadTileColliders(const rapidxml::xml_node<>* RootNode);
 public:
-	LevelMap(const std::string& FilePath);
+	LevelMap(const std::string& FilePath, const std::string& ThemeAudioPath);
 	~LevelMap();
 
 	void RenderTiles(const OrthoCamera& SceneCamera) const;
@@ -65,6 +66,8 @@ public:
 	const std::string& GetLevelName() const;
 	const int& GetLevelIndex() const;
 	const int& GetActIndex() const;
+
+	const std::string& GetThemeAudioPath() const;
 
 	const uint32_t& GetWidthPixels() const;
 	const uint32_t& GetHeightPixels() const;

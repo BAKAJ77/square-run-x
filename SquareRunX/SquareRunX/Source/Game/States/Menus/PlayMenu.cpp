@@ -22,7 +22,7 @@ void PlayMenu::InitState()
 
 	this->NewGameButton = Button({ 0, 0, 445, 100 }, { 315.0, 600.0, (445 * BUTTON_SCALE), (100 * BUTTON_SCALE) },
 		*ResourceLoading::GetGameState()->GetTexture("Button-Img"), *this->ArialRoundedFont, "NEW GAME",
-		[=]() { this->PushState(NewGameMenu::GetGameState()); }, 100);
+		[=]() { this->PushState(NewGameMenu::GetGameState(this->ThemeAudio)); }, 100);
 
 	this->LoadGameButton = Button({ 0, 0, 445, 100 }, { 315.0, 372.0, (445 * BUTTON_SCALE), (100 * BUTTON_SCALE) },
 		*ResourceLoading::GetGameState()->GetTexture("Button-Img"), *this->ArialRoundedFont, "LOAD GAME",
@@ -36,6 +36,9 @@ void PlayMenu::InitState()
 	// Initialize other stuff
 	this->TransitionDest1 = { 0.0, -1400.0, this->SceneCamera.GetViewSize().x, 1400.0 };
 	this->TransitionDest2 = { this->SceneCamera.GetViewSize().x + 600, 0.0, 600.0, this->SceneCamera.GetViewSize().y };
+
+	this->ThemeAudio = AudioPlayer::GetSingleton().PlayAudio("GameFiles/Audio/FILE_SELECT.wav", true, true);
+	this->AudioVolume = 1.0;
 }
 
 void PlayMenu::DestroyState()
@@ -45,6 +48,9 @@ void PlayMenu::DestroyState()
 	this->StageOneComplete = false;
 	this->EndOfState = false;
 	this->PausedState = false;
+
+	AudioPlayer::GetSingleton().StopAllAudio();
+	this->ThemeAudio->drop();
 }
 
 void PlayMenu::PauseState()
@@ -74,7 +80,17 @@ void PlayMenu::UpdateTick(const double& DeltaTime)
 		// Handle transition animation when entering/leaving game state
 		TransitionHandling::UpdateTransition(this->TransitionComplete, this->PreStageComplete, this->StageOneComplete,
 			this->EndOfState, this->TransitionDest1, this->TransitionDest2, this->OpacityMultiplier, this->SceneCamera,
-			DeltaTime, [&]() { this->PopState(); });
+			DeltaTime, [&]() 
+			{ 
+				if (this->AudioVolume == 0.0)
+					this->PopState();
+			});
+
+		if (this->EndOfState)
+		{
+			Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.005, DeltaTime);
+			this->ThemeAudio->setVolume((float)this->AudioVolume);
+		}
 	}
 }
 

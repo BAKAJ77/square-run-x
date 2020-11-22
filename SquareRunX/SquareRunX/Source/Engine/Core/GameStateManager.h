@@ -18,6 +18,11 @@ namespace Transition
 	extern void PlayTransitionScreen(TransitionType Type, const double& DeltaTime);
 }
 
+namespace Effects
+{
+	extern void PlayFadeEffect(TransitionType Type, double& ValueRef, const double& ChangeRate, const double& DeltaTime);
+}
+
 class GameStateBase;
 class OrthoCamera;
 

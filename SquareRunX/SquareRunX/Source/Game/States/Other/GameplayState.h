@@ -21,6 +21,9 @@ private:
 	Rect IntroTransitionDest1, IntroTransitionDest2, IntroTransitionDest3;
 	float IntroTextOpacity = 0.0f;
 	bool IntroComplete = false, ShouldRenderState = false, IntroCurrentlyDisplayed = false, ScreenFadedAway = false;
+
+	PlayableAudio ThemeAudio;
+	double AudioVolume = 1.0;
 private:
 	void SetCurrentGameSave(const GameSave& CurrentGameSave);
 	void HandleIntroTransition(const double& DeltaTime, bool ResetIntroState = false, double DelayTime = 0.0,

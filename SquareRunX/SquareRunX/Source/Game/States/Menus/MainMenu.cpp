@@ -7,6 +7,10 @@
 
 #include "Game/States/Other/ResourceLoading.h"
 
+MainMenu::MainMenu(PlayableAudio MainMenuTheme) :
+	MainMenuTheme(MainMenuTheme)
+{}
+
 void MainMenu::InitState() 
 {
 	this->UpdateAfterPause = false;
@@ -48,10 +52,18 @@ void MainMenu::InitState()
 		*ResourceLoading::GetGameState()->GetFont("Arial-Rounded"), "EXIT", [=]() { this->PopState(); });
 }
 
-void MainMenu::DestroyState() {}
+void MainMenu::DestroyState() { this->MainMenuTheme->drop(); }
+
+void MainMenu::PauseState()
+{
+	AudioPlayer::GetSingleton().StopAllAudio();
+}
 
 void MainMenu::UpdateTick(const double& DeltaTime) 
 {
+	// Handle title fade-in reveal
+	Effects::PlayFadeEffect(TransitionType::REVEAL, this->TitleOpacity, 0.00025, DeltaTime);
+
 	// Update parallax menu background
 	this->MenuBackground.UpdateParallaxState(
 		{ glm::dvec2(-0.00625, 0.0), glm::dvec2(-0.0125, 0.0), glm::dvec2(-0.025, 0.0), glm::dvec2(-0.05, 0.0), 
@@ -61,11 +73,19 @@ void MainMenu::UpdateTick(const double& DeltaTime)
 	constexpr float SCROLL_SPEED = 0.05f;
 	this->SceneCamera.SetPosition({ this->SceneCamera.GetPosition().x + (SCROLL_SPEED * DeltaTime), 0.0f });
 
-	// Update the button states
-	this->PlayButton.UpdateButton();
-	this->LeaderboardButton.UpdateButton();
-	this->ControlsButton.UpdateButton();
-	this->ExitButton.UpdateButton();
+	if (this->MainMenuTheme->isFinished())
+	{
+		Effects::PlayFadeEffect(TransitionType::REVEAL, this->ButtonOpacity, 0.003, DeltaTime);
+
+		if (this->ButtonOpacity == 1.0)
+		{
+			// Update the button states
+			this->PlayButton.UpdateButton();
+			this->LeaderboardButton.UpdateButton();
+			this->ControlsButton.UpdateButton();
+			this->ExitButton.UpdateButton();
+		}
+	}
 }
 
 void MainMenu::RenderFrame() const
@@ -74,17 +94,18 @@ void MainMenu::RenderFrame() const
 	this->MenuBackground.RenderParallax();
 
 	// Render the menu title
-	GraphicsRenderer::GetSingleton().RenderText({ 470, 800 }, 100, "SQUARE RUN X", *this->DiscoveryFont);
+	GraphicsRenderer::GetSingleton().RenderText({ 470, 800 }, 100, "SQUARE RUN X", *this->DiscoveryFont, 
+		{ glm::vec3(0.0f), (float)this->TitleOpacity });
 
 	// Render the menu buttons
-	this->PlayButton.RenderButton();
-	this->LeaderboardButton.RenderButton(1.0f, 15);
-	this->ControlsButton.RenderButton();
-	this->ExitButton.RenderButton();
+	this->PlayButton.RenderButton((float)this->ButtonOpacity);
+	this->LeaderboardButton.RenderButton((float)this->ButtonOpacity, 15);
+	this->ControlsButton.RenderButton((float)this->ButtonOpacity);
+	this->ExitButton.RenderButton((float)this->ButtonOpacity);
 }
 
-MainMenu* MainMenu::GetGameState()
+MainMenu* MainMenu::GetGameState(PlayableAudio MainMenuTheme)
 {
-	static MainMenu State;
+	static MainMenu State(MainMenuTheme);
 	return &State;
 }

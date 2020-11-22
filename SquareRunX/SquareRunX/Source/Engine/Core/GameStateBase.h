@@ -4,6 +4,7 @@
 // Essential engine modules for the game states
 #include "Engine/Core/WindowFrame.h"
 #include "Engine/Core/InputHandler.h"
+#include "Engine/Core/AudioPlayer.h"
 #include "Engine/Debug/LoggingManager.h"
 #include "Engine/Graphics/GraphicsRenderer.h"
 #include "Engine/Graphics/FontLoaderTTF.h"

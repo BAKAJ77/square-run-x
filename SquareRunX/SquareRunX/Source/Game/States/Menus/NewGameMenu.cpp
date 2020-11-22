@@ -22,6 +22,10 @@ namespace TextBoxHandling
 	}
 }
 
+NewGameMenu::NewGameMenu(PlayableAudio AudioTracker) :
+	ThemeAudio(AudioTracker)
+{}
+
 void NewGameMenu::InitState()
 {
 	this->UpdateAfterPause = false;
@@ -44,10 +48,7 @@ void NewGameMenu::InitState()
 		{ 
 			if (TextBoxHandling::EnteredString.size() >= 2 && !Continuing)
 			{
-				GameSave NewSave;
-				NewSave.PlayerName = TextBoxHandling::EnteredString;
-
-				this->SwitchState(GameplayState::GetGameState(NewSave));
+				this->NameConfirmed = true;
 				Continuing = true;
 			}
 		}, 60);
@@ -62,12 +63,33 @@ void NewGameMenu::InitState()
 
 	// Set the text polling callback function
 	glfwSetCharCallback(WindowFrame::GetSingleton().GetLibraryWindow(), TextBoxHandling::PollTextboxInput);
+	this->AudioVolume = 1.0;
 }
 
-void NewGameMenu::DestroyState() {}
+void NewGameMenu::DestroyState() 
+{
+	this->NameConfirmed = false;
+}
 
 void NewGameMenu::UpdateTick(const double& DeltaTime)
 {
+	// Continue if the name is valid and confirmed
+	if (this->NameConfirmed)
+	{
+		if (this->AudioVolume == 0.0)
+		{
+			GameSave NewSave;
+			NewSave.PlayerName = TextBoxHandling::EnteredString;
+
+			this->SwitchState(GameplayState::GetGameState(NewSave));
+		}
+		else
+		{
+			Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.01, DeltaTime);
+			this->ThemeAudio->setVolume((float)this->AudioVolume);
+		}
+	}
+
 	// Update the buttons
 	this->ConfirmButton.UpdateButton();
 	this->CancelButton.UpdateButton();
@@ -109,9 +131,9 @@ void NewGameMenu::RenderFrame() const
 	this->CancelButton.RenderButton();
 }
 
-NewGameMenu* NewGameMenu::GetGameState()
+NewGameMenu* NewGameMenu::GetGameState(PlayableAudio AudioTracker)
 {
-	static NewGameMenu GameState;
+	static NewGameMenu GameState(AudioTracker);
 	return &GameState;
 }
 

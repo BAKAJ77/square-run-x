@@ -13,6 +13,7 @@ private:
 	glm::vec3 TextColor;
 
 	float BrightnessThreshold;
+	bool CursorEntered;
 	uint32_t FontSize;
 	
 	std::function<void()> ExecutableFunction;

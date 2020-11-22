@@ -64,27 +64,38 @@ void ResourceLoading::LoadGameTextures()
        TextureManager::GetSingleton().LoadTexture("FOREST_PX_1", "GameFiles/Textures/Forest/1.png") };
 }
 
-void ResourceLoading::LoadGameAudio()
-{
-    // Load the music and sound effects required by the game
-}
-
 void ResourceLoading::LoadGameLevelMaps()
 {
-    std::this_thread::sleep_for(2s); // Pause the loading thread for a bit
-
     // Load the playable levels required by the game
-    FileHandler::GetSingleton().OpenFile("LEVEL_DATABASE", "GameFiles/Data/LevelDatabase.dat");
+    bool y = FileHandler::GetSingleton().OpenFile("LEVEL_DATABASE", "GameFiles/Data/LevelDatabase.dat");
+    bool x = FileHandler::GetSingleton().OpenFile("LEVEL_AUDIO_DATABASE", "GameFiles/Data/LevelAudioDatabase.dat");
 
     for (int i = 0; i < FileHandler::GetSingleton().GetNumLinesInFile("LEVEL_DATABASE"); i++)
     { 
-        const std::string LOADED_LEVEL_PATH = FileHandler::GetSingleton().ReadData("LEVEL_DATABASE", i + 1).str();
-        LevelMap LoadedLevel = LevelMap(LOADED_LEVEL_PATH);
+        const std::string LEVEL_DATA_STRING = FileHandler::GetSingleton().ReadData("LEVEL_DATABASE", i + 1).str();
+        const std::string MAP_PATH = LEVEL_DATA_STRING.substr(0, LEVEL_DATA_STRING.find(','));
+        const int AUDIO_INDEX = std::stoi(LEVEL_DATA_STRING.substr(LEVEL_DATA_STRING.find(',') + 1, std::string::npos));
+        
+        const std::string AUDIO_PATH = FileHandler::GetSingleton().ReadData("LEVEL_AUDIO_DATABASE", AUDIO_INDEX).str();
 
+        LevelMap LoadedLevel = LevelMap(MAP_PATH, AUDIO_PATH);
         this->GameLevels.emplace_back(LoadedLevel);
     }
 
     FileHandler::GetSingleton().CloseFile("LEVEL_DATABASE");
+    FileHandler::GetSingleton().CloseFile("LEVEL_AUDIO_DATABASE");
+
+    std::this_thread::sleep_for(3s);
+    this->ThemeAudio = AudioPlayer::GetSingleton().PlayAudio("GameFiles/Audio/TITLE_SCREEN.mp3", false, true);
+    
+    // Lock access to variable from other threads temporarily
+    std::this_thread::sleep_for(0.2s);
+
+    Threading::Mutex.lock();
+    this->PlayedMenuMusic = true;
+    Threading::Mutex.unlock();
+
+    std::this_thread::sleep_for(1.8s);
 
     // Lock access to variable from other threads temporarily
     Threading::Mutex.lock();
@@ -96,8 +107,11 @@ void ResourceLoading::InitState()
 {
     this->LoadGameFonts();
     this->LoadGameTextures();
-    this->LoadGameAudio();
 
+    // Setup destination rect of loading wheel
+    this->LoadingWheelDest = { (int)(this->SceneCamera.GetViewSize().x / 2) - 50, 
+        (int)(this->SceneCamera.GetViewSize().y / 2) - 400, 100, 100 };
+ 
     // Start loading the playable levels of the game
     std::thread LevelLoadingThread(&ResourceLoading::LoadGameLevelMaps, this);
     LevelLoadingThread.detach();
@@ -108,9 +122,12 @@ void ResourceLoading::DestroyState() {}
 void ResourceLoading::UpdateTick(const double& DeltaTime)
 {
     if(this->FinishedLoading)
-        this->SwitchState(MainMenu::GetGameState());
+        this->SwitchState(MainMenu::GetGameState(this->ThemeAudio));
 
     this->LoadingWheelRotation += 0.425 * DeltaTime; // Update rotation position of the loading wheel
+
+    if (this->PlayedMenuMusic)
+        this->LoadingWheelDest.y -= 0.125 * DeltaTime;
 }
 
 void ResourceLoading::RenderFrame() const
@@ -119,12 +136,8 @@ void ResourceLoading::RenderFrame() const
     GraphicsRenderer::GetSingleton().SetClearColor(glm::vec3(0.1f));
 
     // Render text and loading wheel to screen
-    Rect SourceRect, DestinationRect;
-    SourceRect = { 0, 0, 800, 800 };
-    DestinationRect = { (int)(this->SceneCamera.GetViewSize().x / 2), (int)(this->SceneCamera.GetViewSize().y / 2) - 400, 
-        60, 60 };
-
-    GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, DestinationRect, *this->GetTexture("Loading-Wheel"), 
+    Rect SourceRect = { 0, 0, 800, 800 };
+    GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, this->LoadingWheelDest, *this->GetTexture("Loading-Wheel"), 
         this->LoadingWheelRotation);
 }
 

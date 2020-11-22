@@ -30,6 +30,9 @@ void LeaderboardMenu::InitState()
 	this->TransitionDest2 = { this->SceneCamera.GetViewSize().x + 600, 0.0, 600.0, this->SceneCamera.GetViewSize().y };
 
 	this->ExtractLeaderboardData();
+
+	this->ThemeAudio = AudioPlayer::GetSingleton().PlayAudio("GameFiles/Audio/LEADERBOARD_THEME.wav", true, true);
+	this->AudioVolume = 1.0;
 }
 
 void LeaderboardMenu::DestroyState()
@@ -38,6 +41,9 @@ void LeaderboardMenu::DestroyState()
 	this->PreStageComplete = false;
 	this->StageOneComplete = false;
 	this->EndOfState = false;
+
+	AudioPlayer::GetSingleton().StopAllAudio();
+	this->ThemeAudio->drop();
 }
 
 void LeaderboardMenu::UpdateTick(const double& DeltaTime)
@@ -52,7 +58,17 @@ void LeaderboardMenu::UpdateTick(const double& DeltaTime)
 		// Handle transition animation when entering/leaving game state
 		TransitionHandling::UpdateTransition(this->TransitionComplete, this->PreStageComplete, this->StageOneComplete,
 			this->EndOfState, this->TransitionDest1, this->TransitionDest2, this->OpacityMultiplier, this->SceneCamera,
-			DeltaTime, [&]() { this->PopState(); });
+			DeltaTime, [&]()
+			{
+				if (this->AudioVolume == 0.0)
+					this->PopState();
+			});
+
+		if (this->EndOfState)
+		{
+			Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.005, DeltaTime);
+			this->ThemeAudio->setVolume((float)this->AudioVolume);
+		}
 	}
 }
 

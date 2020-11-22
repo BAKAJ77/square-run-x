@@ -14,12 +14,20 @@ private:
 	Button PlayButton, LeaderboardButton, ControlsButton, ExitButton;
 	
 	ParallaxBKG MenuBackground;
+
+	// Backend things
+	PlayableAudio MainMenuTheme;
+	double ButtonOpacity = 0.0, TitleOpacity = 0.0;
+private:
+	MainMenu(PlayableAudio MainMenuTheme);
 public:
 	void InitState() override;
 	void DestroyState() override;
 
+	void PauseState() override;
+
 	void UpdateTick(const double& DeltaTime) override;
 	void RenderFrame() const override;
 public:
-	static MainMenu* GetGameState();
+	static MainMenu* GetGameState(PlayableAudio MainMenuTheme);
 };
