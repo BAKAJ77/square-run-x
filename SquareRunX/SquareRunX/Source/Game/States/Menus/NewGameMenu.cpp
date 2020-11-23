@@ -85,7 +85,7 @@ void NewGameMenu::UpdateTick(const double& DeltaTime)
 		}
 		else
 		{
-			Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.01, DeltaTime);
+			Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.003, DeltaTime);
 			this->ThemeAudio->setVolume((float)this->AudioVolume);
 		}
 	}

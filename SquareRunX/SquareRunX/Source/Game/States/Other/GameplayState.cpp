@@ -140,7 +140,7 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 				else
 				{
 					static double ElapsedFadeTime = 0.0;
-					if (ElapsedFadeTime >= 1000.0)
+					if (ElapsedFadeTime >= 500.0)
 					{
 						Transition::PlayTransitionScreen(TransitionType::REVEAL, DeltaTime);
 						if (PostProcessing::GetSingleton().GetOpacity() >= 1.0)
@@ -244,7 +244,7 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 						static double ElapsedTime = 0.0;
 						ElapsedTime += DeltaTime;
 
-						if (ElapsedTime >= 2000.0)
+						if (ElapsedTime >= 1500.0)
 						{
 							FinishedDisplay = true;
 							StageOneComplete = false;

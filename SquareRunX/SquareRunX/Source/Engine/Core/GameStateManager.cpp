@@ -2,6 +2,8 @@
 #include "GameStateBase.h"
 #include "Engine/Graphics/OrthogonalCamera.h"
 
+#include <algorithm>
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace Transition
@@ -26,9 +28,11 @@ namespace Effects
 	void PlayFadeEffect(TransitionType Type, double& ValueRef, const double& ChangeRate, const double& DeltaTime)
 	{
 		if (Type == TransitionType::REVEAL)
-			ValueRef = std::min(ValueRef + (ChangeRate * DeltaTime), 1.0);
+			ValueRef += ChangeRate * DeltaTime;
 		else if (Type == TransitionType::HIDE)
-			ValueRef = std::max(ValueRef - (ChangeRate * DeltaTime), 0.0);
+			ValueRef -= ChangeRate * DeltaTime;
+
+		ValueRef = std::clamp(ValueRef, 0.0, 1.0);
 	}
 }
 
