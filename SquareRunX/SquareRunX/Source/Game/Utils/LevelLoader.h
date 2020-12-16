@@ -61,7 +61,7 @@ public:
 	LevelMap(const std::string& FilePath, const std::string& ThemeAudioPath);
 	~LevelMap();
 
-	void RenderTiles(const OrthoCamera& SceneCamera) const;
+	void RenderTiles(const OrthoCamera& SceneCamera, const double& Brightness) const;
 public:
 	const std::string& GetLevelName() const;
 	const int& GetLevelIndex() const;

@@ -37,7 +37,7 @@ public:
 	virtual void DestroyEntity() = 0;
 
 	virtual void UpdateEntity(const LevelMap* Map, const double& DeltaTime) = 0;
-	void RenderEntity(float Opacity = 1.0f) const;
+	void RenderEntity(const double& Brightness, float Opacity = 1.0f) const;
 public:
 	const glm::dvec2& GetPosition() const;
 	const glm::dvec2& GetScale() const;
@@ -48,4 +48,5 @@ public:
 	const double& GetWeight() const;
 
 	const ColliderBox& GetBoundingBox() const;
+	AnimatedSprite& GetAnimatedSprite();
 };

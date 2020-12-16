@@ -22,7 +22,7 @@ void PlayMenu::InitState()
 
 	this->NewGameButton = Button({ 0, 0, 445, 100 }, { 315.0, 600.0, (445 * BUTTON_SCALE), (100 * BUTTON_SCALE) },
 		*ResourceLoading::GetGameState()->GetTexture("Button-Img"), *this->ArialRoundedFont, "NEW GAME",
-		[=]() { this->PushState(NewGameMenu::GetGameState(this->ThemeAudio)); }, 100);
+		[=]() { this->PushState(NewGameMenu::GetGameState()); }, 100);
 
 	this->LoadGameButton = Button({ 0, 0, 445, 100 }, { 315.0, 372.0, (445 * BUTTON_SCALE), (100 * BUTTON_SCALE) },
 		*ResourceLoading::GetGameState()->GetTexture("Button-Img"), *this->ArialRoundedFont, "LOAD GAME",
@@ -43,6 +43,8 @@ void PlayMenu::InitState()
 
 void PlayMenu::DestroyState()
 {
+	this->OpacityMultiplier = 0.0;
+
 	this->TransitionComplete = false;
 	this->PreStageComplete = false;
 	this->StageOneComplete = false;

@@ -12,10 +12,8 @@ private:
 	Button ConfirmButton, CancelButton;
 	bool NameConfirmed = false;
 
-	PlayableAudio ThemeAudio;
 	double AudioVolume = 1.0;
 private:
-	NewGameMenu(PlayableAudio AudioTracker);
 	void PopLastCharacter(const double& DeltaTime) const;
 public:
 	void InitState() override;
@@ -24,5 +22,5 @@ public:
 	void UpdateTick(const double& DeltaTime) override;
 	void RenderFrame() const override;
 public:
-	static NewGameMenu* GetGameState(PlayableAudio AudioTracker);
+	static NewGameMenu* GetGameState();
 };

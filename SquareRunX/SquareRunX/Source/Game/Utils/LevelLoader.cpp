@@ -37,13 +37,13 @@ LevelMap::LevelMap(const std::string& FilePath, const std::string& ThemeAudioPat
 
 LevelMap::~LevelMap() {}
 
-void LevelMap::RenderTiles(const OrthoCamera& SceneCamera) const
+void LevelMap::RenderTiles(const OrthoCamera& SceneCamera, const double& Brightness) const
 {
     Rect CameraViewBox = { (int)SceneCamera.GetPosition().x, (int)SceneCamera.GetPosition().y,
         (int)SceneCamera.GetViewSize().x, (int)SceneCamera.GetViewSize().y };
 
     // Render the map's background
-    this->MapBackground.RenderParallax();
+    this->MapBackground.RenderParallax((float)Brightness);
 
     // Render the tiles in the level scene
     for (const auto& Layer : this->Layers)
@@ -57,7 +57,7 @@ void LevelMap::RenderTiles(const OrthoCamera& SceneCamera) const
                 TileObj.Destination.y <= CameraViewBox.y + CameraViewBox.h)
             {
                 GraphicsRenderer::GetSingleton().RenderQuad(TileObj.TextureAtlas, TileObj.Destination,
-                    *this->TileSheetObj.TileSheetTex);
+                    *this->TileSheetObj.TileSheetTex, 0.0, false, false, (float)Brightness);
             }
         }
     }

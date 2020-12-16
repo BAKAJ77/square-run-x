@@ -4,10 +4,17 @@
 #include "Game/Utils/TransitionHandler.h"
 #include "Game/Utils/LevelLoader.h"
 
+// Branching game states
+#include "Game/States/Menus/PauseGameMenu.h"
+#include "Game/States/Other/GameOverState.h"
+
 void GameplayState::InitState()
 {
+	this->UpdateAfterPause = false;
+
 	// Get the fonts needed
 	this->ArialRoundedFont = ResourceLoading::GetGameState()->GetFont("Arial-Rounded");
+	this->FFFFont = ResourceLoading::GetGameState()->GetFont("FFF-Forwa");
 
 	// Get the textures needed
 	this->IntroTransitionTex1 = ResourceLoading::GetGameState()->GetTexture("Transition-1");
@@ -30,12 +37,28 @@ void GameplayState::InitState()
 
 	this->ThemeAudio = AudioPlayer::GetSingleton().PlayAudio(this->CurrentLevel->GetThemeAudioPath().c_str(), true, true, 
 		true);
+	this->LevelTimeElapsedMS = this->CurrentGameSave.LevelTimePassedMS;
 }
 
 void GameplayState::DestroyState()
 {
+	this->AudioVolume = 1.0;
+	this->CounterTextOpacity = 0.0;
+	this->IntroTextOpacity = 0.0;
+	this->SceneBrightness = 1.0;
+
 	this->IntroComplete = false;
+	this->IntroCurrentlyDisplayed = false;
 	this->ShouldRenderState = false;
+	this->ScreenFadedAway = false;
+	this->GameOver = false;
+	this->Paused = false;
+}
+
+void GameplayState::ResumeState()
+{
+	this->Paused = false;
+	this->AudioVolume = 1.0;
 }
 
 void GameplayState::UpdateTick(const double& DeltaTime)
@@ -47,37 +70,104 @@ void GameplayState::UpdateTick(const double& DeltaTime)
 	}
 	else
 	{
-		// Update level scene entities/objects
-		this->PlayerController.UpdateEntity(this->CurrentLevel, DeltaTime);
-		this->CurrentLevel->GetBackground().UpdateParallaxState(
+		this->PlayerController.GetAnimatedSprite().SetAnimationPaused(this->Paused);
+
+		// Check if player pressed ESCAPE to pause game
+		if (InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_ESCAPE) && !this->PlayerController.IsDestroyed())
+			this->Paused = true;
+
+		if (!this->Paused)
+		{
+			this->LevelTimeElapsedMS += DeltaTime;
+
+			// Update level scene entities/objects
+			this->PlayerController.UpdateEntity(this->CurrentLevel, DeltaTime);
+			this->CurrentLevel->GetBackground().UpdateParallaxState(
+				{
+					glm::dvec2(-0.00125 * this->PlayerController.GetCurrentVelocity().x, 0.0),
+					glm::dvec2(-0.0025 * this->PlayerController.GetCurrentVelocity().x, 0.0),
+					glm::dvec2(std::min(-0.0075 * this->PlayerController.GetCurrentVelocity().x, -0.0075), 0.0),
+					glm::dvec2(-0.01 * this->PlayerController.GetCurrentVelocity().x, 0.0),
+					glm::dvec2(-0.02 * this->PlayerController.GetCurrentVelocity().x, 0.0),
+					glm::dvec2(-0.04 * this->PlayerController.GetCurrentVelocity().x, 0.0)
+				}, this->SceneCamera, DeltaTime);
+
+			Effects::PlayFadeEffect(TransitionType::REVEAL, this->SceneBrightness, 0.002, DeltaTime);
+			Effects::PlayFadeEffect(TransitionType::REVEAL, this->CounterTextOpacity, 0.0015, DeltaTime);
+		}
+		else
+		{
+			// Do paused scene fade effect
+			Effects::PlayFadeEffect(TransitionType::HIDE, this->CounterTextOpacity, 0.0015, DeltaTime);
+			if (this->CounterTextOpacity <= 0.0)
 			{
-				glm::dvec2(-0.00125 * this->PlayerController.GetCurrentVelocity().x, 0.0),  
-				glm::dvec2(-0.0025 * this->PlayerController.GetCurrentVelocity().x, 0.0),
-				glm::dvec2(std::min(-0.0075 * this->PlayerController.GetCurrentVelocity().x, -0.0075), 0.0),
-				glm::dvec2(-0.01 * this->PlayerController.GetCurrentVelocity().x, 0.0),  
-				glm::dvec2(-0.02 * this->PlayerController.GetCurrentVelocity().x, 0.0), 
-				glm::dvec2(-0.04 * this->PlayerController.GetCurrentVelocity().x, 0.0) 
-			}, this->SceneCamera, DeltaTime);
+				if (this->SceneBrightness <= 0.3)
+				{
+					this->RenderAfterPause = true;
+					this->PushState(PauseGameMenu::GetGameState());
+				}
+				else
+					Effects::PlayFadeEffect(TransitionType::HIDE, this->SceneBrightness, 0.002, DeltaTime);
+			}
+		}
 	}
 
 	// Check if player's health is empty, if so then stop gameplay and respawn player at last checkpoint
 	if (this->PlayerController.IsHealthEmpty() && this->IntroComplete)
 	{
-		this->HandleIntroTransition(DeltaTime, true, 2000.0, true);
-		if(!this->PlayerController.IsDestroyed())
+		if (!this->PlayerController.IsDestroyed())
+		{
 			this->PlayerController.DestroyEntity();
+			if(this->PlayerController.GetLivesCounter() == 0)
+				this->GameOver = true;
+		}
+
+		if (this->GameOver)
+		{
+			Transition::PlayTransitionScreen(TransitionType::HIDE, DeltaTime);
+			
+			if (PostProcessing::GetSingleton().GetOpacity() == 0.0 && this->GameOver)
+			{
+				Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.001, DeltaTime);
+				this->ThemeAudio->setVolume((float)this->AudioVolume);
+
+				static double ElapsedTime = 0.0;
+				if (ElapsedTime >= 1500.0 && this->AudioVolume >= 0.0)
+				{
+					this->RenderAfterPause = false;
+
+					this->PushState(GameOverState::GetGameState());
+					this->ThemeAudio->setIsPaused();
+					this->GameOver = false;
+					
+					ElapsedTime = 0.0;
+				}
+				else
+					ElapsedTime += DeltaTime;
+			}
+		}
+
+		if (!this->GameOver)
+			this->HandleIntroTransition(DeltaTime, true, 2000.0, true);
 	}
 
 	if (this->IntroCurrentlyDisplayed && this->PlayerController.IsHealthEmpty())
+	{
 		this->PlayerController.RespawnEntity(this->CurrentLevel);
+		if (this->PlayerController.GetLivesCounter() < 0)
+			this->PlayerController.SetLivesCounter(3);
+	}
 }
 
 void GameplayState::RenderFrame() const
 {
 	if (this->ShouldRenderState && !this->ScreenFadedAway)
 	{
-		this->CurrentLevel->RenderTiles(this->SceneCamera);
-		this->PlayerController.RenderEntity();
+		this->CurrentLevel->RenderTiles(this->SceneCamera, this->SceneBrightness);
+		this->PlayerController.RenderEntity((float)this->SceneBrightness);
+
+		if(this->CounterTextOpacity > 0.0)
+			this->RenderCounters();
 	}
 
 	if (!this->IntroComplete)
@@ -98,6 +188,29 @@ void GameplayState::RenderFrame() const
 			std::to_string(this->CurrentLevel->GetLevelIndex()) + " ACT " + std::to_string(this->CurrentLevel->GetActIndex()),
 			*this->ArialRoundedFont, { 1.0f, 0.0f, 0.0f, this->IntroTextOpacity }, true);
 	}
+}
+
+void GameplayState::RenderCounters() const
+{
+	// Generate the counter text strings
+	const std::string SCORE_TEXT_STR = "SCORE: " + std::to_string(this->CurrentGameSave.Score);
+	const std::string LIVES_TEXT_STR = "LIVES: " + std::to_string(this->PlayerController.GetLivesCounter());
+	const std::string TIME_TEXT_STR = "TIME: " + std::to_string((int)(this->LevelTimeElapsedMS / 1000.0) / 60) + "mins " +
+		std::to_string((int)(this->LevelTimeElapsedMS / 1000.0) % 60) + "secs";
+
+	// Calculate the required widths of the text strings
+	const float SCORE_TEXT_WIDTH = GraphicsRenderer::GetSingleton().GetTextSize(SCORE_TEXT_STR, *this->FFFFont, 72).x;
+	const float LIVES_TEXT_WIDTH = GraphicsRenderer::GetSingleton().GetTextSize(LIVES_TEXT_STR, *this->FFFFont, 72).x;
+
+	// Render the counters
+	constexpr float TEXT_OFFSET = 25;
+
+	GraphicsRenderer::GetSingleton().RenderText({ (1920.0f - SCORE_TEXT_WIDTH) - TEXT_OFFSET, 965 }, 72, SCORE_TEXT_STR,
+		*this->FFFFont, { 0.0f, 0.0f, 1.0f, (float)this->CounterTextOpacity }, true);
+	GraphicsRenderer::GetSingleton().RenderText({ (1920.0f - LIVES_TEXT_WIDTH) - TEXT_OFFSET, 20 }, 72, LIVES_TEXT_STR,
+		*this->FFFFont, { 0.0f, 0.0f, 1.0f, (float)this->CounterTextOpacity }, true);
+	GraphicsRenderer::GetSingleton().RenderText({ TEXT_OFFSET, 965 }, 72, TIME_TEXT_STR, *this->FFFFont, 
+		{ 0.0f, 0.0f, 1.0f, (float)this->CounterTextOpacity }, true);
 }
 
 GameplayState* GameplayState::GetGameState(const GameSave& CurrentGameSave)
@@ -158,6 +271,7 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 
 					CompletedFadeAway = true;
 					this->ScreenFadedAway = true;
+					this->CounterTextOpacity = 0.0;
 
 					ElapsedFadeTime += DeltaTime;
 				}
@@ -199,6 +313,7 @@ void GameplayState::HandleIntroTransition(const double& DeltaTime, bool ResetInt
 						PreStageComplete = false;
 
 						this->IntroComplete = true;
+						this->LevelTimeElapsedMS = this->CurrentGameSave.LevelTimePassedMS;
 					}
 					else
 						this->IntroTransitionDest1.y -= (int)(TRANSITION_SPEED * DeltaTime);

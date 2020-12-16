@@ -20,15 +20,15 @@ struct LoadedTexture
 class ResourceLoading : public GameStateBase
 {
 private:
-	std::array<LoadedFont, 3> GameFonts;
-	std::array<LoadedTexture, 17> GameTextures;
+	std::array<LoadedFont, 4> GameFonts;
+	std::array<LoadedTexture, 18> GameTextures;
 	mutable std::vector<LevelMap> GameLevels;
 
 	Rect LoadingWheelDest;
 
 	double LoadingWheelRotation = 0.0;
 	bool LoadingWheelLoaded = false, FinishedLoading = false, PlayedMenuMusic = false;
-
+public:
 	PlayableAudio ThemeAudio;
 private:
 	void LoadGameFonts();

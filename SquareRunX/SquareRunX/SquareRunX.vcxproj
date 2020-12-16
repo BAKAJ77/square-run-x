@@ -44,7 +44,9 @@
     <ClInclude Include="Source\Game\States\Menus\LeaderboardMenu.h" />
     <ClInclude Include="Source\Game\States\Menus\MainMenu.h" />
     <ClInclude Include="Source\Game\States\Menus\NewGameMenu.h" />
+    <ClInclude Include="Source\Game\States\Menus\PauseGameMenu.h" />
     <ClInclude Include="Source\Game\States\Menus\PlayMenu.h" />
+    <ClInclude Include="Source\Game\States\Other\GameOverState.h" />
     <ClInclude Include="Source\Game\States\Other\GameplayState.h" />
     <ClInclude Include="Source\Game\States\Other\ResourceLoading.h" />
     <ClInclude Include="Source\Game\Utils\ButtonObject.h" />
@@ -86,7 +88,9 @@
     <ClCompile Include="Source\Game\States\Menus\LeaderboardMenu.cpp" />
     <ClCompile Include="Source\Game\States\Menus\MainMenu.cpp" />
     <ClCompile Include="Source\Game\States\Menus\NewGameMenu.cpp" />
+    <ClCompile Include="Source\Game\States\Menus\PauseGameMenu.cpp" />
     <ClCompile Include="Source\Game\States\Menus\PlayMenu.cpp" />
+    <ClCompile Include="Source\Game\States\Other\GameOverState.cpp" />
     <ClCompile Include="Source\Game\States\Other\GameplayState.cpp" />
     <ClCompile Include="Source\Game\States\Other\ResourceLoading.cpp" />
     <ClCompile Include="Source\Game\Utils\ButtonObject.cpp" />

@@ -64,7 +64,7 @@ void ParallaxBKG::UpdateParallaxState(const std::vector<glm::dvec2>& Velocities,
 	}
 }
 
-void ParallaxBKG::RenderParallax() const
+void ParallaxBKG::RenderParallax(float Brightness) const
 {
 	for (uint32_t LayerIndex = 0; LayerIndex < this->Layers.size(); LayerIndex++)
 	{
@@ -76,7 +76,8 @@ void ParallaxBKG::RenderParallax() const
 				this->Layers[LayerIndex]->GetHeight() * this->ScaleFactor };
 
 			// Render the layer
-			GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, DestinationRect, *this->Layers[LayerIndex], 0.0, true);
+			GraphicsRenderer::GetSingleton().RenderQuad(SourceRect, DestinationRect, *this->Layers[LayerIndex], 0.0, true, false,
+				Brightness);
 		}
 	}
 }

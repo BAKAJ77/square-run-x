@@ -16,10 +16,8 @@ private:
 	ParallaxBKG MenuBackground;
 
 	// Backend things
-	PlayableAudio MainMenuTheme;
+	//PlayableAudio MainMenuTheme;
 	double ButtonOpacity = 0.0, TitleOpacity = 0.0;
-private:
-	MainMenu(PlayableAudio MainMenuTheme);
 public:
 	void InitState() override;
 	void DestroyState() override;
@@ -29,5 +27,5 @@ public:
 	void UpdateTick(const double& DeltaTime) override;
 	void RenderFrame() const override;
 public:
-	static MainMenu* GetGameState(PlayableAudio MainMenuTheme);
+	static MainMenu* GetGameState();
 };

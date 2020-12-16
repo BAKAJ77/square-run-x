@@ -31,10 +31,10 @@ void EntityBase::UpdateBoundingBox()
 	this->BoundingBox = { this->Position.x, this->Position.y, this->Scale.x, this->Scale.y };
 }
 
-void EntityBase::RenderEntity(float Opacity) const
+void EntityBase::RenderEntity(const double& Brightness, float Opacity) const
 {
 	this->AnimSprite.RenderAnimation({ this->Position.x, this->Position.y, this->Scale.x, this->Scale.y },
-		static_cast<float>(this->RotationAngle), Opacity);
+		static_cast<float>(this->RotationAngle), (float)Brightness, Opacity);
 }
 
 void EntityBase::HandleSafeCollisions(const LevelMap* Map, const double& DeltaTime)
@@ -92,3 +92,5 @@ const double& EntityBase::GetAcceleration() const { return this->Acceleration; }
 const double& EntityBase::GetWeight() const { return this->Weight; }
 
 const ColliderBox& EntityBase::GetBoundingBox() const { return this->BoundingBox; }
+
+AnimatedSprite& EntityBase::GetAnimatedSprite() { return this->AnimSprite; }

@@ -86,9 +86,6 @@ private:
 public:
 	void SetClearColor(const glm::vec3& Color);
 
-	/*
-	* NOTE: Lower layers are drawn further top.
-	*/
 	void RenderText(const glm::vec2& Pos, const uint32_t& FontSize, const std::string& Text, const Font& CurrentFont, 
 		const glm::vec4& Color = { 0.0f, 0.0f, 0.0f, 1.0f }, bool RaiseText = false) const;
 

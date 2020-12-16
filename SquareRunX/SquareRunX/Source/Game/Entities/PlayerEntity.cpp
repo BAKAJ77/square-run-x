@@ -1,5 +1,6 @@
 #include "PlayerEntity.h"
 #include "Engine/Core/InputHandler.h"
+#include "Engine/Core/AudioPlayer.h"
 #include "Game/States/Other/ResourceLoading.h"
 
 #include <algorithm>
@@ -10,12 +11,12 @@ namespace
 }
 
 PlayerEntity::PlayerEntity() :
-	JumpHeight(3.0f), LivesCounter(3), CurrentHealth(100), MaxHealth(100), SceneCamera(nullptr)
+	JumpHeight(3.0f), LivesCounter(3), CurrentHealth(100), MaxHealth(100), SceneCamera(nullptr), SpaceKeyReleased(true)
 {}
 
 PlayerEntity::PlayerEntity(OrthoCamera& SceneCamera, const glm::dvec2& Pos, const glm::dvec2& Scale, double MaxSpeed, 
 	double Acceleration, double JumpHeight, double Weight) :
-	JumpHeight(JumpHeight), SpawnPointPosition(Pos), SceneCamera(&SceneCamera)
+	JumpHeight(JumpHeight), SpawnPointPosition(Pos), SceneCamera(&SceneCamera), SpaceKeyReleased(true)
 {
 	// Setup the animation of the player entity
 	this->AnimSprite = AnimatedSprite(ResourceLoading::GetGameState()->GetTexture("Player-Spritesheet"));
@@ -47,6 +48,7 @@ PlayerEntity::~PlayerEntity() {}
 
 void PlayerEntity::ExecuteJump()
 {
+	AudioPlayer::GetSingleton().PlayAudio("GameFiles/Audio/JUMP_SFX.mp3");
 	this->CurrentVelocity.y = this->JumpHeight;
 }
 
@@ -115,22 +117,30 @@ void PlayerEntity::HandleEvents(const double& DeltaTime)
 	else
 		this->StopMovement(DeltaTime);
 
-	// Input for vertical movement
-	if (InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_SPACE) && this->IsOnGround)
+	// Input for vertical movement (also prevent repeated jumps when holding key)
+	if (!InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_SPACE))
+		this->SpaceKeyReleased = true;
+
+	if (InputHandler::GetSingleton().IsKeyHeld(InputCode::KEY_SPACE) && this->IsOnGround && this->SpaceKeyReleased)
+	{
 		this->ExecuteJump();
+		this->SpaceKeyReleased = false;
+	}
 }
 
 void PlayerEntity::DestroyEntity()
 {
 	this->CurrentVelocity = glm::dvec2(0.0);
 	this->Destroyed = true;
-	this->LivesCounter--;
 
+	AudioPlayer::GetSingleton().PlayAudio("GameFiles/Audio/DEATH_SFX.mp3");
 	this->AnimSprite.SetCurrentAnimation("Destroyed");
 }
 
 void PlayerEntity::RespawnEntity(const LevelMap* Map)
 {
+	this->LivesCounter--;
+
 	this->CurrentHealth = this->MaxHealth;
 	this->Position = this->SpawnPointPosition;
 	this->Destroyed = false;

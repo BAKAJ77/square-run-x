@@ -3,6 +3,7 @@
 
 #include "Game/States/Other/ResourceLoading.h"
 #include "Game/Utils/TransitionHandler.h"
+#include "Game/States/Menus/PlayMenu.h"
 
 // Branching game states
 #include "Game/States/Other/GameplayState.h"
@@ -22,10 +23,6 @@ namespace TextBoxHandling
 	}
 }
 
-NewGameMenu::NewGameMenu(PlayableAudio AudioTracker) :
-	ThemeAudio(AudioTracker)
-{}
-
 void NewGameMenu::InitState()
 {
 	this->UpdateAfterPause = false;
@@ -40,24 +37,20 @@ void NewGameMenu::InitState()
 
 	// Setup the buttons needed
 	constexpr double BUTTON_SCALE = 1.2;
-	static bool Continuing = false;
-
+	
 	this->ConfirmButton = Button({ 0, 0, 445, 100 }, { 180.0, 200.0, (445 * BUTTON_SCALE), (100 * BUTTON_SCALE) },
 		*ResourceLoading::GetGameState()->GetTexture("Button-Img"), *this->ArialRoundedFont, "CONFIRM",
 		[&]() 
 		{ 
-			if (TextBoxHandling::EnteredString.size() >= 2 && !Continuing)
-			{
+			if (TextBoxHandling::EnteredString.size() >= 2 && !this->NameConfirmed)
 				this->NameConfirmed = true;
-				Continuing = true;
-			}
 		}, 60);
 
 	this->CancelButton = Button({ 0, 0, 445, 100 }, { 775.0, 200.0, (445 * BUTTON_SCALE), (100 * BUTTON_SCALE) },
 		*ResourceLoading::GetGameState()->GetTexture("Button-Img"), *this->ArialRoundedFont, "CANCEL",
 		[&]() 
 		{ 
-			if (!Continuing)
+			if (!this->NameConfirmed)
 				this->PopState();
 		}, 60);
 
@@ -76,17 +69,15 @@ void NewGameMenu::UpdateTick(const double& DeltaTime)
 	// Continue if the name is valid and confirmed
 	if (this->NameConfirmed)
 	{
-		if (this->AudioVolume == 0.0)
+		Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.0025, DeltaTime);
+		PlayMenu::GetGameState()->ThemeAudio->setVolume((float)this->AudioVolume);
+
+		if (this->AudioVolume <= 0.0)
 		{
 			GameSave NewSave;
 			NewSave.PlayerName = TextBoxHandling::EnteredString;
 
 			this->SwitchState(GameplayState::GetGameState(NewSave));
-		}
-		else
-		{
-			Effects::PlayFadeEffect(TransitionType::HIDE, this->AudioVolume, 0.003, DeltaTime);
-			this->ThemeAudio->setVolume((float)this->AudioVolume);
 		}
 	}
 
@@ -131,9 +122,9 @@ void NewGameMenu::RenderFrame() const
 	this->CancelButton.RenderButton();
 }
 
-NewGameMenu* NewGameMenu::GetGameState(PlayableAudio AudioTracker)
+NewGameMenu* NewGameMenu::GetGameState()
 {
-	static NewGameMenu GameState(AudioTracker);
+	static NewGameMenu GameState;
 	return &GameState;
 }
 

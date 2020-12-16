@@ -19,5 +19,5 @@ public:
 
 	void UpdateParallaxState(const std::vector<glm::dvec2>& Velocities, const OrthoCamera& SceneCamera,
 		const double& DeltaTime);
-	void RenderParallax() const;
+	void RenderParallax(float Brightness = 1.0f) const;
 };

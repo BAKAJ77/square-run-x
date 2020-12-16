@@ -7,10 +7,6 @@
 
 #include "Game/States/Other/ResourceLoading.h"
 
-MainMenu::MainMenu(PlayableAudio MainMenuTheme) :
-	MainMenuTheme(MainMenuTheme)
-{}
-
 void MainMenu::InitState() 
 {
 	this->UpdateAfterPause = false;
@@ -52,7 +48,11 @@ void MainMenu::InitState()
 		*ResourceLoading::GetGameState()->GetFont("Arial-Rounded"), "EXIT", [=]() { this->PopState(); });
 }
 
-void MainMenu::DestroyState() { this->MainMenuTheme->drop(); }
+void MainMenu::DestroyState() 
+{
+	this->TitleOpacity = 0.0;
+	this->ButtonOpacity = 0.0;
+}
 
 void MainMenu::PauseState()
 {
@@ -73,7 +73,7 @@ void MainMenu::UpdateTick(const double& DeltaTime)
 	constexpr float SCROLL_SPEED = 0.05f;
 	this->SceneCamera.SetPosition({ this->SceneCamera.GetPosition().x + (SCROLL_SPEED * DeltaTime), 0.0f });
 
-	if (this->MainMenuTheme->isFinished())
+	if (ResourceLoading::GetGameState()->ThemeAudio->isFinished())
 	{
 		Effects::PlayFadeEffect(TransitionType::REVEAL, this->ButtonOpacity, 0.003, DeltaTime);
 
@@ -104,8 +104,8 @@ void MainMenu::RenderFrame() const
 	this->ExitButton.RenderButton((float)this->ButtonOpacity);
 }
 
-MainMenu* MainMenu::GetGameState(PlayableAudio MainMenuTheme)
+MainMenu* MainMenu::GetGameState()
 {
-	static MainMenu State(MainMenuTheme);
+	static MainMenu State;
 	return &State;
 }

@@ -21,6 +21,8 @@ void ResourceLoading::LoadGameFonts()
         FontLoaderTTF::GetSingleton().LoadFont("SANS_SERIF_SHADED", "GameFiles/Fonts/SANSSERIFSH.TTF") };
     this->GameFonts[2] = { "Discovery",
         FontLoaderTTF::GetSingleton().LoadFont("DISCOVERY", "GameFiles/Fonts/DISCOVERY.TTF") };
+    this->GameFonts[3] = { "FFF-Forwa",
+        FontLoaderTTF::GetSingleton().LoadFont("FFF_FORWA", "GameFiles/Fonts/FFFFORWA.TTF") };
 }
 
 void ResourceLoading::LoadGameTextures()
@@ -62,6 +64,8 @@ void ResourceLoading::LoadGameTextures()
        TextureManager::GetSingleton().LoadTexture("FOREST_PX_2", "GameFiles/Textures/Forest/2.png") };
     this->GameTextures[16] = { "Forest-Sky",
        TextureManager::GetSingleton().LoadTexture("FOREST_PX_1", "GameFiles/Textures/Forest/1.png") };
+    this->GameTextures[17] = { "Game-Over",
+       TextureManager::GetSingleton().LoadTexture("GAME_OVER_FADE", "GameFiles/Textures/GAMEOVER_FADE.png") };
 }
 
 void ResourceLoading::LoadGameLevelMaps()
@@ -122,7 +126,7 @@ void ResourceLoading::DestroyState() {}
 void ResourceLoading::UpdateTick(const double& DeltaTime)
 {
     if(this->FinishedLoading)
-        this->SwitchState(MainMenu::GetGameState(this->ThemeAudio));
+        this->SwitchState(MainMenu::GetGameState());
 
     this->LoadingWheelRotation += 0.425 * DeltaTime; // Update rotation position of the loading wheel
 

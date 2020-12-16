@@ -10,6 +10,8 @@ private:
 	glm::dvec2 SpawnPointPosition;
 	int LivesCounter, CurrentHealth, MaxHealth;
 	double JumpHeight;
+
+	bool SpaceKeyReleased;
 private:
 	// Movement functions
 	void ExecuteJump();
