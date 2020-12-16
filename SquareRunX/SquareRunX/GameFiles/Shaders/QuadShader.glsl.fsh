@@ -22,7 +22,8 @@ void main()
     vec4 FinalColor;
     if(Mat.UseTextures)
     {
-        FinalColor = texture(Mat.DiffuseMap, FshIn.UVCoords) * Mat.BrightnessThreshold;
+        FinalColor = texture(Mat.DiffuseMap, FshIn.UVCoords);
+        FinalColor.rgb *= Mat.BrightnessThreshold;
         FinalColor.a *= Mat.OpacityMultiplier;
     }
     else
