@@ -9,6 +9,7 @@
 
 void MainMenu::InitState() 
 {
+	WindowFrame::GetSingleton().SetCursorState(CursorState::NORMAL);
 	this->UpdateAfterPause = false;
 
 	// Get the fonts needed

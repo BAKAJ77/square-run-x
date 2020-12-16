@@ -11,6 +11,8 @@ using namespace std::chrono_literals;
 
 void PauseGameMenu::InitState()
 {
+	WindowFrame::GetSingleton().SetCursorState(CursorState::NORMAL);
+
 	// Get the fonts needed
 	this->FFFFont = ResourceLoading::GetGameState()->GetFont("FFF-Forwa");
 

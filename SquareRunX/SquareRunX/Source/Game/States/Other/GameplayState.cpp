@@ -10,6 +10,7 @@
 
 void GameplayState::InitState()
 {
+	WindowFrame::GetSingleton().SetCursorState(CursorState::LOCK);
 	this->UpdateAfterPause = false;
 
 	// Get the fonts needed
@@ -59,6 +60,8 @@ void GameplayState::ResumeState()
 {
 	this->Paused = false;
 	this->AudioVolume = 1.0;
+
+	WindowFrame::GetSingleton().SetCursorState(CursorState::LOCK);
 }
 
 void GameplayState::UpdateTick(const double& DeltaTime)
