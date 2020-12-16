@@ -3,15 +3,18 @@
 #include "Engine/Core/WindowFrame.h"
 
 AnimatedSprite::AnimatedSprite() :
-    CurrentAnimationIndex(0), CurrentFrameIndex(0), PreviousTime(WindowFrame::GetSingleton().GetTick()), SpriteSheetTex(nullptr)
+    CurrentAnimationIndex(0), CurrentFrameIndex(0), PreviousTime(WindowFrame::GetSingleton().GetTick()), SpriteSheetTex(nullptr),
+    Paused(false)
 {}
 
-AnimatedSprite::AnimatedSprite(const Texture* SpriteSheet) :
-    SpriteSheetTex(SpriteSheet), CurrentAnimationIndex(0), CurrentFrameIndex(0), 
+AnimatedSprite::AnimatedSprite(const Texture* SpriteSheet, bool Paused) :
+    SpriteSheetTex(SpriteSheet), CurrentAnimationIndex(0), CurrentFrameIndex(0), Paused(Paused),
     PreviousTime(WindowFrame::GetSingleton().GetTick())
 {}
 
 AnimatedSprite::~AnimatedSprite() {}
+
+void AnimatedSprite::SetAnimationPaused(bool Paused) { this->Paused = Paused; }
 
 void AnimatedSprite::SetCurrentAnimation(const std::string& Name)
 {
@@ -77,7 +80,7 @@ void AnimatedSprite::AddAnimation(const std::string& Name, uint32_t NumFrames, c
     this->Animations.emplace_back(NewAnimation);
 }
 
-void AnimatedSprite::RenderAnimation(const Rect& Destination, float RotationAngle, float Opacity) const
+void AnimatedSprite::RenderAnimation(const Rect& Destination, float RotationAngle, float Brightness, float Opacity) const
 {
     if (this->SpriteSheetTex) // Make sure sprite sheet texture is valid
     {
@@ -93,10 +96,11 @@ void AnimatedSprite::RenderAnimation(const Rect& Destination, float RotationAngl
         }
 
         GraphicsRenderer::GetSingleton().RenderQuad(CURRENT_ANIMATION.Frames[this->CurrentFrameIndex], Destination, 
-            *this->SpriteSheetTex, RotationAngle, false, false, 1.0f, Opacity);
+            *this->SpriteSheetTex, RotationAngle, false, false, Brightness, Opacity);
 
         // Increment current frame index if frame time is exceeded
-        if (WindowFrame::GetSingleton().GetTick() - this->PreviousTime >= CURRENT_ANIMATION.TimePerFrame)
+        if (WindowFrame::GetSingleton().GetTick() - this->PreviousTime >= CURRENT_ANIMATION.TimePerFrame && 
+            !this->Paused)
         {
             this->CurrentFrameIndex++;
             this->PreviousTime = WindowFrame::GetSingleton().GetTick();
