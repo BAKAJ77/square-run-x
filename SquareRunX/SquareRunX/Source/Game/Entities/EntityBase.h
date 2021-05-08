@@ -19,8 +19,8 @@ protected:
 	void UpdateBoundingBox();
 
 	void ApplyGravity(const double& DeltaTime);
-	void HandleSafeCollisions(const LevelMap* Map, const double& DeltaTime); // Basically only handles collisions with normal tiles
-	bool IsCollidingWithDamageTile(const LevelMap* Map) const; // Basically checks if entity is colliding with a damaging tile e.g spikes
+	void HandleSafeCollisions(const LevelMap* Map, const Rect& CullBounds, const double& DeltaTime); // Basically only handles collisions with normal tiles
+	bool IsCollidingWithDamageTile(const LevelMap* Map, const Rect& CullBounds) const; // Basically checks if entity is colliding with a damaging tile e.g spikes
 public:
 	EntityBase();
 	virtual ~EntityBase();

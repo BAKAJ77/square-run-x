@@ -21,6 +21,8 @@ private:
 	void StopMovement(const double& DeltaTime);
 
 	// Other functions
+	void HandleCheckpointCollision(const LevelMap* Map);
+
 	void UpdateCameraPosition(const LevelMap* Map);
 	void HandleEvents(const double& DeltaTime);
 public:

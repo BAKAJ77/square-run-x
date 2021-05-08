@@ -48,6 +48,7 @@ private:
 	std::vector<SceneLayer> Layers;
 	std::vector<ColliderBox> SafeColliders, DamagingColliders;
 	
+	glm::dvec2 FirstLevelSpawnPoint, LevelFinishPoint;
 	std::vector<glm::dvec2> PlayerCheckpoints;
 private:
 	void RetrieveLevelMetadata(const rapidxml::xml_node<>* RootNode);
@@ -71,6 +72,9 @@ public:
 
 	const uint32_t& GetWidthPixels() const;
 	const uint32_t& GetHeightPixels() const;
+
+	const glm::dvec2& GetFirstLevelSpawnPoint() const;
+	const glm::dvec2& GetLevelFinishPoint() const;
 
 	const std::vector<glm::dvec2>& GetPlayerCheckpoints() const;
 	const std::vector<ColliderBox>& GetSafeColliders() const;

@@ -209,10 +209,20 @@ void LevelMap::LoadSpawnPoints(const rapidxml::xml_node<>* RootNode)
             for (rapidxml::xml_node<>* Object = ObjectGroup->first_node("object"); Object != nullptr;
                 Object = Object->next_sibling("object")) // Loop through the spawn point objects
             {
-                if (std::string(Object->first_attribute("name")->value()) == "CHECKPOINT")
+                if (std::string(Object->first_attribute("name")->value()) == "SPAWN")
+                {
+                    this->FirstLevelSpawnPoint = { std::stod(Object->first_attribute("x")->value()),
+                       this->Height - std::stod(Object->first_attribute("y")->value()) };
+                }
+                else if (std::string(Object->first_attribute("name")->value()) == "CHECKPOINT")
                 {
                     this->PlayerCheckpoints.push_back({ std::stod(Object->first_attribute("x")->value()),
                        this->Height - std::stod(Object->first_attribute("y")->value()) });
+                }
+                else if (std::string(Object->first_attribute("name")->value()) == "FINISH")
+                {
+                    this->LevelFinishPoint = { std::stod(Object->first_attribute("x")->value()),
+                       this->Height - std::stod(Object->first_attribute("y")->value()) };
                 }
                 else if (std::string(Object->first_attribute("name")->value()) == "ENEMY")
                 {
@@ -310,6 +320,10 @@ const int& LevelMap::GetActIndex() const { return this->ActIndex; }
 
 const uint32_t& LevelMap::GetWidthPixels() const { return this->Width; }
 const uint32_t& LevelMap::GetHeightPixels() const { return this->Height; }
+
+const glm::dvec2& LevelMap::GetFirstLevelSpawnPoint() const { return this->FirstLevelSpawnPoint; }
+
+const glm::dvec2& LevelMap::GetLevelFinishPoint() const { return this->LevelFinishPoint; }
 
 const std::vector<glm::dvec2>& LevelMap::GetPlayerCheckpoints() const { return this->PlayerCheckpoints; }
 

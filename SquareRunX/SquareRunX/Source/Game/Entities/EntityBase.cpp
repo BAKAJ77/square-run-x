@@ -37,47 +37,57 @@ void EntityBase::RenderEntity(const double& Brightness, float Opacity) const
 		static_cast<float>(this->RotationAngle), (float)Brightness, Opacity);
 }
 
-void EntityBase::HandleSafeCollisions(const LevelMap* Map, const double& DeltaTime)
+void EntityBase::HandleSafeCollisions(const LevelMap* Map, const Rect& CullBounds, const double& DeltaTime)
 {
 	for (const auto& Collider : Map->GetSafeColliders())
 	{
-		const ColliderSide SIDE_COLLIDED = this->BoundingBox.IsColliding(Collider);
-
-		if (SIDE_COLLIDED == ColliderSide::TOP)
+		// Only check for collision if it's near
+		if (Collider.x + Collider.w >= CullBounds.x && Collider.x <= CullBounds.x + CullBounds.w &&
+			Collider.y + Collider.h >= CullBounds.y && Collider.y <= CullBounds.y + CullBounds.h)
 		{
-			this->Position.y = Collider.GetBottomSide() - this->BoundingBox.h;
-			this->CurrentVelocity.y = 0.0;
-		}
-		else if (SIDE_COLLIDED == ColliderSide::BOTTOM)
-		{
-			this->Position.y = Collider.GetTopSide();
-			this->CurrentVelocity.y = 0.0;
+			const ColliderSide SIDE_COLLIDED = this->BoundingBox.IsColliding(Collider);
 
-			this->IsOnGround = true;
-		}
-		else if (SIDE_COLLIDED == ColliderSide::LEFT)
-		{
-			this->Position.x = Collider.GetRightSide();
-			this->CurrentVelocity.x = 0.0;
+			if (SIDE_COLLIDED == ColliderSide::TOP)
+			{
+				this->Position.y = Collider.GetBottomSide() - this->BoundingBox.h;
+				this->CurrentVelocity.y = 0.0;
+			}
+			else if (SIDE_COLLIDED == ColliderSide::BOTTOM)
+			{
+				this->Position.y = Collider.GetTopSide();
+				this->CurrentVelocity.y = 0.0;
 
-			this->ApplyGravity(DeltaTime);
-		}
-		else if (SIDE_COLLIDED == ColliderSide::RIGHT)
-		{
-			this->Position.x = Collider.GetLeftSide() - this->BoundingBox.w;
-			this->CurrentVelocity.x = 0.0;
+				this->IsOnGround = true;
+			}
+			else if (SIDE_COLLIDED == ColliderSide::LEFT)
+			{
+				this->Position.x = Collider.GetRightSide();
+				this->CurrentVelocity.x = 0.0;
 
-			this->ApplyGravity(DeltaTime);
+				this->ApplyGravity(DeltaTime);
+			}
+			else if (SIDE_COLLIDED == ColliderSide::RIGHT)
+			{
+				this->Position.x = Collider.GetLeftSide() - this->BoundingBox.w;
+				this->CurrentVelocity.x = 0.0;
+
+				this->ApplyGravity(DeltaTime);
+			}
 		}
 	}
 }
 
-bool EntityBase::IsCollidingWithDamageTile(const LevelMap* Map) const
+bool EntityBase::IsCollidingWithDamageTile(const LevelMap* Map, const Rect& CullBounds) const
 {
 	for (const auto& Collider : Map->GetDamagingColliders())
 	{
-		if (this->BoundingBox.IsColliding(Collider) != ColliderSide::NONE)
-			return true;
+		// Only check for collision if it's near
+		if (Collider.x + Collider.w >= CullBounds.x && Collider.x <= CullBounds.x + CullBounds.w &&
+			Collider.y + Collider.h >= CullBounds.y && Collider.y <= CullBounds.y + CullBounds.h)
+		{
+			if (this->BoundingBox.IsColliding(Collider) != ColliderSide::NONE)
+				return true;
+		}
 	}
 
 	return false;

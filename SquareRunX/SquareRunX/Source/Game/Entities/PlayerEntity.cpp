@@ -155,8 +155,11 @@ void PlayerEntity::UpdateEntity(const LevelMap* Map, const double& DeltaTime)
 {
 	if (!this->Destroyed)
 	{
+		const Rect CULLING_BOUNDS = { this->SceneCamera->GetPosition().x, this->SceneCamera->GetPosition().y,
+			this->SceneCamera->GetViewSize().x, this->SceneCamera->GetViewSize().y };
+
 		// Handle physics related stuff
-		this->HandleSafeCollisions(Map, DeltaTime);
+		this->HandleSafeCollisions(Map, CULLING_BOUNDS, DeltaTime);
 		this->HandleEvents(DeltaTime);
 		this->ApplyGravity(DeltaTime);
 
@@ -173,7 +176,8 @@ void PlayerEntity::UpdateEntity(const LevelMap* Map, const double& DeltaTime)
 		this->UpdateBoundingBox();
 
 		// Set the position of player to last checkpoint if destroyed
-		if (this->IsCollidingWithDamageTile(Map))
+		this->HandleCheckpointCollision(Map);
+		if (this->IsCollidingWithDamageTile(Map, CULLING_BOUNDS))
 			this->CurrentHealth = 0; // TEMPORARY
 	}
 }
@@ -183,6 +187,23 @@ void PlayerEntity::SetCurrentHealth(int Health) { this->CurrentHealth = Health; 
 void PlayerEntity::SetMaximumHealth(int MaxHealth) { this->MaxHealth = MaxHealth; }
 
 void PlayerEntity::SetSpawnPointPosition(const glm::dvec2& Pos) { this->SpawnPointPosition = Pos; }
+
+void PlayerEntity::HandleCheckpointCollision(const LevelMap* Map)
+{
+	for (const auto& Checkpoint : Map->GetPlayerCheckpoints())
+	{
+		if (Checkpoint.x >= this->BoundingBox.x && Checkpoint.x <= this->BoundingBox.x + this->BoundingBox.w &&
+			Checkpoint.y >= this->BoundingBox.y && Checkpoint.y <= this->BoundingBox.y + this->BoundingBox.h)
+		{
+			if (this->SpawnPointPosition != Checkpoint)
+			{
+				AudioPlayer::GetSingleton().PlayAudio("GameFiles/Audio/CHECKPOINT_SFX.mp3");
+				this->SetSpawnPointPosition(Checkpoint);
+			}
+			break;
+		}
+	}
+}
 
 void PlayerEntity::UpdateCameraPosition(const LevelMap* Map)
 {

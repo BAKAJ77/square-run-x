@@ -29,8 +29,17 @@ void GameplayState::InitState()
 	this->IntroTransitionDest3 = { -60.0, -600.0, this->SceneCamera.GetViewSize().x, 600.0 };
 
 	this->CurrentLevel = ResourceLoading::GetGameState()->GetLevelMap(this->CurrentGameSave.Level, this->CurrentGameSave.Act);
-	this->PlayerController = PlayerEntity(this->SceneCamera, 
-		this->CurrentLevel->GetPlayerCheckpoints()[this->CurrentGameSave.CheckpointIndex], { 64, 64 }, 1.0, 0.0075, 1.75);
+	
+	if (this->CurrentGameSave.CheckpointIndex == -1)
+	{
+		this->PlayerController = PlayerEntity(this->SceneCamera, this->CurrentLevel->GetFirstLevelSpawnPoint(), { 64, 64 },
+			1.0, 0.0075, 2.25);
+	}
+	else
+	{
+		this->PlayerController = PlayerEntity(this->SceneCamera,
+			this->CurrentLevel->GetPlayerCheckpoints()[this->CurrentGameSave.CheckpointIndex], { 64, 64 }, 1.0, 0.0075, 2.25);
+	}
 
 	this->PlayerController.SetLivesCounter(this->CurrentGameSave.NumLives);
 	this->PlayerController.SetCurrentHealth(this->CurrentGameSave.CurrentHealth);
@@ -87,12 +96,12 @@ void GameplayState::UpdateTick(const double& DeltaTime)
 			this->PlayerController.UpdateEntity(this->CurrentLevel, DeltaTime);
 			this->CurrentLevel->GetBackground().UpdateParallaxState(
 				{
-					glm::dvec2(-0.00125 * this->PlayerController.GetCurrentVelocity().x, 0.0),
-					glm::dvec2(-0.0025 * this->PlayerController.GetCurrentVelocity().x, 0.0),
-					glm::dvec2(std::min(-0.0075 * this->PlayerController.GetCurrentVelocity().x, -0.0075), 0.0),
 					glm::dvec2(-0.01 * this->PlayerController.GetCurrentVelocity().x, 0.0),
-					glm::dvec2(-0.02 * this->PlayerController.GetCurrentVelocity().x, 0.0),
-					glm::dvec2(-0.04 * this->PlayerController.GetCurrentVelocity().x, 0.0)
+					glm::dvec2(-0.015 * this->PlayerController.GetCurrentVelocity().x, 0.0),
+					glm::dvec2(std::min(-0.02 * this->PlayerController.GetCurrentVelocity().x, -0.02), 0.0),
+					glm::dvec2(-0.025 * this->PlayerController.GetCurrentVelocity().x, 0.0),
+					glm::dvec2(-0.05 * this->PlayerController.GetCurrentVelocity().x, 0.0),
+					glm::dvec2(-0.1 * this->PlayerController.GetCurrentVelocity().x, 0.0)
 				}, this->SceneCamera, DeltaTime);
 
 			Effects::PlayFadeEffect(TransitionType::REVEAL, this->SceneBrightness, 0.002, DeltaTime);
@@ -121,8 +130,11 @@ void GameplayState::UpdateTick(const double& DeltaTime)
 		if (!this->PlayerController.IsDestroyed())
 		{
 			this->PlayerController.DestroyEntity();
-			if(this->PlayerController.GetLivesCounter() == 0)
+			if (this->PlayerController.GetLivesCounter() == 0)
+			{
 				this->GameOver = true;
+				this->PlayerController.SetSpawnPointPosition(this->CurrentLevel->GetFirstLevelSpawnPoint());
+			}
 		}
 
 		if (this->GameOver)
